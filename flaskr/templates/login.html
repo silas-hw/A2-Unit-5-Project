@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% block title %}Login{% endblock %} 
+
+{% block content %} 
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <p class="error-msg">{{ err_msg }}</p>
+        <form action="{{ url_for('auth.login') }}" method='post' class="login-form">
+            <input type="text" name="email" placeholder="Email" id="email" required>
+            <input type="password" name="password" placeholder="Password" id="password" required>
+            <input type="submit" value="Login" class="submit">
+        </form>
+    </div>
+</div>
+
+{% endblock %}
