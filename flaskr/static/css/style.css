@@ -4,6 +4,11 @@
     --primary-background-color: rgb(246, 246, 246);
     --secondary-background-color: rgb(231, 239, 241);
 
+    --primary-highlight-color: rgb(86, 86, 247);
+    --secondary-highlight-color: rgb(99, 46, 231);
+
+    --navbar-color: rgb(146, 146, 242);
+
     --error-color: rgb(229, 79, 79);
 }
 
@@ -29,7 +34,54 @@ input {
 
 /* navbar */
 div.navbar {
-    padding: 10px;
+    background-color: var(--navbar-color);
+    height: 60px;
+}
+
+div.navbar > div {
+    display: inline-block;
+    padding: 5px;
+    width: 150px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+div.navbar-link-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+
+    text-align: center;
+
+    padding: 0px;
+}
+
+div.navbar-link-container > a {
+    text-decoration: none;
+    color: var(--primary-background-color);
+}
+
+div.navbar-login {
+    background-color: var(--primary-highlight-color);
+    margin-right: 0px;
+    float: right;
+}
+
+div.navbar-account {
+    background-color: var(--secondary-highlight-color);
+    margin-right: 0px;
+    float: right;
+}
+
+div.navbar-register {
+    background-color: var(--secondary-highlight-color);
+    margin-right: 0px;
+    float: right;
 }
 
 div.content {
