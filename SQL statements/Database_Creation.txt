@@ -1,6 +1,7 @@
 CREATE TABLE user (
     Username VARCHAR(255) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL CHECK(length(Password) >=8),
-    Email VARCHAR(255) NOT NULL UNIQUE
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    Newsletter INT NOT NULL DEFAULT 0,
 );
 

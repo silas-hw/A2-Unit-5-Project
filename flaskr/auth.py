@@ -12,7 +12,7 @@ def login():
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         db_conn = sqlite3.connect('./db/prototype.db')
-        cursor = db_conn.execute('SELECT rowid, Username FROM user WHERE Email=? AND Password=?', (email, password_hash))
+        cursor = db_conn.execute('SELECT rowid, Username FROM users WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
 
@@ -56,15 +56,15 @@ def register():
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         db_conn = sqlite3.connect('./db/prototype.db')
-        cursor = db_conn.execute('SELECT rowid FROM user WHERE Email=? OR Username=?', (email, username))
+        cursor = db_conn.execute('SELECT rowid FROM users WHERE Email=? OR Username=?', (email, username))
         res = cursor.fetchone()
 
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')
         
-        db_conn.execute('INSERT INTO user (username, email, password) VALUES (?, ?, ?)', (username, email, password_hash))
+        db_conn.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, password_hash))
         db_conn.commit()
-        userid = db_conn.execute('SELECT rowid FROM user WHERE email=?', (email,)).fetchone()[0]
+        userid = db_conn.execute('SELECT rowid FROM users WHERE email=?', (email,)).fetchone()[0]
         db_conn.close()
 
         session['loggedin'] = True
