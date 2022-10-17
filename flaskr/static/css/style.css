@@ -128,8 +128,18 @@ form.login-form > input {
 
 form.login-form > input.submit {
     margin-top: 10px;
-    width: 50px;
-    margin-right: 0px
+    margin-right: 0px;
+
+    width: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    background-color: var(--secondary-highlight-color);
+    color: var(--primary-background-color);
+}
+
+form.login-form > label {
+    font-size: 0.8em;
 }
 
 p.error-msg {
