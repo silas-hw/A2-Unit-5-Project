@@ -53,6 +53,7 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        newsletter = 1 if request.form['newsletter'] == "1" else 0
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         db_conn = sqlite3.connect('./db/prototype.db')
@@ -62,7 +63,7 @@ def register():
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')
         
-        db_conn.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, password_hash))
+        db_conn.execute('INSERT INTO users (username, email, password, newsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
         db_conn.commit()
         userid = db_conn.execute('SELECT rowid FROM users WHERE email=?', (email,)).fetchone()[0]
         db_conn.close()
