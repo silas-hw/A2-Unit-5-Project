@@ -26,7 +26,6 @@ def login():
         else:
             return render_template('login.html', err_msg='Incorrect Username or Password')
     
-    
     if 'loggedin' in session:
         return redirect(url_for('main.home'))
 
