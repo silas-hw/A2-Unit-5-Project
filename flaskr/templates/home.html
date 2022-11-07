@@ -9,9 +9,68 @@
 {% endblock %}
 
 {% block content %}
-<div class="description">
-    <b>What <i>is</i> LoreLock?</b>
-    <p>Only the best tool for creating and sharing creative works, whether it be for a TTRPG, story, or just for fun!</p>
-    <p>LoreLock was created by FictionFarm in 2022, whose main goal as a company is to facilitate the creation of amazing fictional works. This place is both a tool <i>and</i> a community, so don't be scared to ask for feedback on anything you create!</p>
+
+<div class="landing-content">
+    <div class="left">
+        <div class="description">
+            <b>What <i>is</i> LoreLock?</b>
+            <p>Only the best tool for creating and sharing creative works, whether it be for a TTRPG, story, or just for fun!</p>
+            <p>LoreLock was created by FictionFarm in 2022, whose main goal as a company is to facilitate the creation of amazing fictional works. This place is both a tool <i>and</i> a community, so don't be scared to ask for feedback on anything you create!</p>
+        </div>
+
+        <div class="reviews">
+            <h1>Reviews</h1>
+
+            <div class="review">
+                <div class="review-user">User 1</div>
+                <div class="review-score">5/5</div>
+            </div>
+
+            <div class="review">
+                <div class="review-user">User 2</div>
+                <div class="review-score">4/5</div>
+            </div>
+
+            <div class="review">
+                <div class="review-user">User 2</div>
+                <div class="review-score">4/5</div>
+            </div>
+
+            <div class="review">
+                <div class="review-user">User 2</div>
+                <div class="review-score">4/5</div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <div class="right">
+        <div class="create-account">
+            <h2>For Game Masters, Players, Story Writers & Hobbyists</h2>
+            <p>Creating an account is a single one-step process! Make one today for the amazingly cheap cost of FREE</p>
+            
+            <div class="center-wrapper">
+                <button class="create-account" onclick="window.location.href={{ url_for('auth.register') }}">Create Account</button>
+            </div>
+
+            <p>Creating a LoreLock account will grant you access to these tools:</p>
+            <ul>
+                <li>The creation of up to 15 different Lore documents</li>
+                <li>Sharing you Lore online</li>
+                <li>Commenting on and liking community posts</li>
+                <li>FREE writing tips and advice</li>
+            </ul>
+            
+            <p>Additionally, if you pay for our premium membership you'll be able to:</p>
+            <ul>
+                <li>Create community posts</li>
+                <li>Create as many documents as you like</li>
+                <li>Have music play as someone visits your account page</li>
+                <li>Display your <i>best</i> works at the top of your account page</li>
+                <li>And even more!</li>
+            </ul>
+        </div>
+    </div>
 </div>
+
 {% endblock %}
