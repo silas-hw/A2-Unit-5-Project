@@ -47,6 +47,8 @@ div.background-img-wrapper{
     width: 100%;
     z-index: -999;
     position: absolute;
+
+    overflow: hidden;
 }
 
 img.background-img {
@@ -62,7 +64,7 @@ img.background-img {
 }
 
 div.landing-content {
-    width:70%;
+    width:1000px;
     margin: auto;
 }
 
@@ -132,7 +134,7 @@ div.reviews > div.review {
 
     float: left;
 
-    margin-bottom: 2px;
+    margin-bottom: 5px;
 }
 
 div.reviews > div.review > div.review-user {
