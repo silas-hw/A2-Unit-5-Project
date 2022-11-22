@@ -1,5 +1,5 @@
 CREATE TABLE User (
-    AccountID INT PRIMARY KEY,
+    AccountID INTEGER NOT NULL PRIMARY KEY,
 
     Username VARCHAR(64) NOT NULL UNIQUE CHECK(length(Username)>3),
     Password VARCHAR(255) NOT NULL CHECK(length(Password) >= 8),
@@ -14,13 +14,13 @@ CREATE TABLE User (
 );
 
 CREATE TABLE AccessLevel (
-    AccessLevel INT PRIMARY KEY,
+    AccessLevel INTEGER PRIMARY KEY,
     Name VARCHAR(5) NOT NULL,
     Description VARCHAR(64)
 );
 
 CREATE TABLE LoreDocument (
-    DocumentID INT PRIMARY KEY,
+    DocumentID INTEGER PRIMARY KEY,
 
     DocumentName VARCHAR(64) NOT NULL,
     Description VARCHAR(255),
@@ -31,7 +31,7 @@ CREATE TABLE LoreDocument (
 );
 
 CREATE TABLE LorePage (
-    PageID INT PRIMARY KEY,
+    PageID INTEGER PRIMARY KEY,
 
     Name VARHCAR(64) NOT NULL,
     Descriptoin VARCHAR(255),
@@ -42,7 +42,7 @@ CREATE TABLE LorePage (
 );
 
 CREATE TABLE LoreDocumentComment (
-    CommentID INT PRIMARY KEY,
+    CommentID INTEGER PRIMARY KEY,
 
     Content VARCHAR(255) NOT NULL,
     Date STRING(10) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE LoreDocumentComment (
 );
 
 CREATE TABLE LoreDocumentLike (
-    LikeID INT PRIMARY KEY,
+    LikeID INTEGER PRIMARY KEY,
     
     DocumentID INT NOT NULL,
     FOREIGN KEY(DocumentID) REFERENCES LoreDocument(DocumentID)
