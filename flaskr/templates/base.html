@@ -13,13 +13,13 @@
         {% if 'loggedin' in session %}
         <div class="navbar-account">
             <div class="navbar-link-container">
-                <a href="{{ url_for('users.account') }}">Account</a>
+                <a href="{{ url_for('users.account', account_id=session['userid']) }}">Account</a>
             </div>
         </div>
 
         <div class="navbar-login">
             <div class="navbar-link-container">
-                <a href="{{ url_for('auth.logout') }}">Logout</a>
+                <a href="{{ url_for('auth.logout')}}">Logout</a>
             </div> 
         </div>
         {% else %}

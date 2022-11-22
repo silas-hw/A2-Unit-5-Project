@@ -9,13 +9,13 @@ CREATE TABLE User (
     BankAccountNum VARCHAR(17) CHECK(length(BankAccountNum) >= 8),
     BankSortCode STRING(6) CHECK(length(BankSortCode)==6),
 
-    AccessLevel INT NOT NULL DEFAULT 0,
+    AccessLevel INT NOT NULL DEFAULT 1,
     FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessLevel)
 );
 
 CREATE TABLE AccessLevel (
-    AccessLevel INTEGER PRIMARY KEY,
-    Name VARCHAR(5) NOT NULL,
+    AccessID INTEGER PRIMARY KEY,
+    Name VARCHAR(10) NOT NULL,
     Description VARCHAR(64)
 );
 
