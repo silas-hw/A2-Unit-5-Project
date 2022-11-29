@@ -34,7 +34,7 @@ CREATE TABLE LorePage (
     PageID INTEGER PRIMARY KEY,
 
     Name VARHCAR(64) NOT NULL,
-    Descriptoin VARCHAR(255),
+    Description VARCHAR(255),
     Content VARCHAR(5000),
 
     DocumentID INT NOT NULL,
