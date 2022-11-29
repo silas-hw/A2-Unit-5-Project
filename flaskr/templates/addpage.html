@@ -1,0 +1,13 @@
+{% extends "base.html" %} 
+{% block title %}Add Page{% endblock %}
+
+{% block content %} 
+<form id='page' action="{{ url_for('documents.add_page', document_id=document_id) }}" method="post">
+    <h3>Page Title</h3>
+    <input type="text" name="title" style="display:block">
+    <h3>content</h3>
+    <textarea name="content" form='page' style="height:500px; width:70%; display:block; resize:none"></textarea>
+    <input type="submit" value="add">
+</form>
+
+{% endblock %} 

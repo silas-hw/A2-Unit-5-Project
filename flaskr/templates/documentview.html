@@ -1,0 +1,12 @@
+{% extends "base.html" %} 
+{% block title %}Document Page{% endblock %}
+
+{% block content %}
+    {% if document_owner %}
+    <button onclick="window.location.href='/document/addpage/{{ document_id }}'">Add page</button>
+    {% endif %} 
+
+    {% for page in pages %} 
+        <a href="{{page[0]}}/">{{page[1]}}</a>
+    {% endfor %} 
+{% endblock %} 
