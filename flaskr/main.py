@@ -9,7 +9,18 @@ bp = Blueprint('main', __name__)
 def home():
     if 'loggedin' in session:
         return redirect(url_for('main.dashboard'))
-    return render_template('home.html', session=session)
+
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
+    ratings_temp=cursor.fetchall()
+    ratings=[]
+    for i, rating in enumerate(ratings_temp):
+        cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (rating[1],))
+        username = cursor.fetchone()[0]
+        rating = [rating[0], username]
+        ratings.append(rating)
+    
+    return render_template('home.html', session=session, ratings=ratings)
 
 @bp.route('/', methods=['GET'])
 @bp.route('/dashboard/', methods=['GET'])
