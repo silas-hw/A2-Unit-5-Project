@@ -21,26 +21,12 @@
         <div class="reviews">
             <h1>Reviews</h1>
 
+            {% for rating in ratings %}
             <div class="review">
-                <div class="review-user">User 1</div>
-                <div class="review-score">5/5</div>
+                <div class="review-user">{{ rating[1] }}</div>
+                <div class="review-score">{{ rating[0] }}/5</div>
             </div>
-
-            <div class="review">
-                <div class="review-user">User 2</div>
-                <div class="review-score">4/5</div>
-            </div>
-
-            <div class="review">
-                <div class="review-user">User 2</div>
-                <div class="review-score">4/5</div>
-            </div>
-
-            <div class="review">
-                <div class="review-user">User 2</div>
-                <div class="review-score">4/5</div>
-            </div>
-            
+            {% endfor %}  
         </div>
     </div>
     
