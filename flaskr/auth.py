@@ -62,7 +62,7 @@ def register():
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')
         
-        db_conn.execute('INSERT INTO User (username, email, password, newsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
+        db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
         db_conn.commit()
         userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
         db_conn.close()
