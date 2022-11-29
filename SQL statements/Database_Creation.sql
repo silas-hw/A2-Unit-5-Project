@@ -10,7 +10,7 @@ CREATE TABLE User (
     BankSortCode STRING(6) CHECK(length(BankSortCode)==6),
 
     AccessLevel INT NOT NULL DEFAULT 1,
-    FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessLevel)
+    FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessID)
 );
 
 CREATE TABLE AccessLevel (
@@ -48,9 +48,9 @@ CREATE TABLE LoreDocumentComment (
     Date STRING(10) NOT NULL,
 
     DocumentID INT NOT NULL,
-    FOREIGN KEY(DocumentID) REFERENCES LoreDocument(DocumentID)
-
     AccountID INT NOT NULL,
+
+    FOREIGN KEY(DocumentID) REFERENCES LoreDocument(DocumentID),
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
 );
 
@@ -58,7 +58,15 @@ CREATE TABLE LoreDocumentLike (
     LikeID INTEGER PRIMARY KEY,
     
     DocumentID INT NOT NULL,
-    FOREIGN KEY(DocumentID) REFERENCES LoreDocument(DocumentID)
+    AccountID INT NOT NULL,
+
+    FOREIGN KEY(DocumentID) REFERENCES LoreDocument(DocumentID),
+    FOREIGN KEY(AccountID) REFERENCES User(AccountID)
+);
+
+CREATE TABLE WebsiteRating (
+    RatingID INTEGER PRIMARY KEY,
+    Rating INT NOT NULL CHECK(rating<=5),
 
     AccountID INT NOT NULL,
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
