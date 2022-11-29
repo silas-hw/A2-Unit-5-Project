@@ -5,6 +5,7 @@ import os
 from .auth import bp as auth_bp
 from .main import bp as main_bp
 from .users import bp as users_bp
+from .documents import bp as documents_bp
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -14,5 +15,6 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(documents_bp)
 
     return app
