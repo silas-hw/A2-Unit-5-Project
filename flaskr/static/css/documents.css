@@ -1,0 +1,18 @@
+/* 
+    page list view
+*/
+
+div.page-list {
+    display: block;
+    padding: 20px 15% 20px 15%;
+}
+
+a.page-link {
+    display: block;
+    margin: 5px;
+}
+
+button.add-page {
+    float: right;
+    margin-top: 10px;
+}
