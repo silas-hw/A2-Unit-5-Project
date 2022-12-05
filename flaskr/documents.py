@@ -5,8 +5,7 @@ import markdown
 bp = Blueprint('documents', __name__)
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
-@bp.route('/document/view/<document_id>/<page_id>/', methods=['GET', 'POST'])
-def page_view(document_id, page_id=None):
+def document_view(document_id, page_id=None):
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
@@ -15,20 +14,30 @@ def page_view(document_id, page_id=None):
 
     if res[1]==0 and not document_owner:
         return 'the document you attempted to view is private'
-    
-    if page_id==None:
-        cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
-        pages = cursor.fetchall()
 
-        return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id)
-        
-    cursor = db_conn.execute('SELECT content FROM LorePage WHERE DocumentID=? AND PageID=?', (document_id, page_id))
+    cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
+    pages = cursor.fetchall()
+
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id)
+
+@bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
+def page_view(page_id):
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
+    res = cursor.fetchone()
+
+    document_owner = True if 'userid' in session and session['userid']==res[0] else False
+
+    if res[1]==0 and not document_owner:
+        return 'the document you attempted to view is private'
+
+    cursor = db_conn.execute('SELECT content FROM LorePage WHERE PageID=?', (page_id,))
     
     md_content = cursor.fetchone()[0]
     html_content = markdown.markdown(md_content)
-    return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner)
+    return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
 
-@bp.route('/document/addpage/<document_id>', methods=['GET', 'POST'])
+@bp.route('/page/add/<document_id>/', methods=['GET', 'POST'])
 def add_page(document_id):
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
@@ -38,7 +47,7 @@ def add_page(document_id):
         return 'You do not own this document'
 
     if request.method=='GET':
-        return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='')
+        return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
 
     elif request.method=='POST':
         title = request.form['title']
@@ -49,7 +58,7 @@ def add_page(document_id):
 
         return redirect(url_for('documents.page_view', document_id=document_id))
 
-@bp.route('/document/editpage/<page_id>', methods=['GET', 'POST'])
+@bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 def edit_page(page_id):
     db_conn = sqlite3.connect('./db/prototype.db')
     # need to add document id here

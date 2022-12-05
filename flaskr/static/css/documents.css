@@ -16,3 +16,17 @@ button.add-page {
     float: right;
     margin-top: 10px;
 }
+
+input.doc-save {
+    padding: 10px 5px 10px 5px;
+    background-color: var(--primary-highlight-color);
+    color: white;
+}
+
+button.page-edit {
+    background-color: var(--primary-highlight-color);
+    color: white;
+
+    float: right;
+
+}

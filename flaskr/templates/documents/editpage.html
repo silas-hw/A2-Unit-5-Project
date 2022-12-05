@@ -1,6 +1,10 @@
 {% extends "base.html" %} 
 {% block title %}Add Page{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+{% endblock %}
+
 {% block content %} 
 
 {% if action=='add' %}
@@ -13,7 +17,7 @@
     <input type="text" name="title" style="display:block" value="{{ page_title }}">
     <h3>content</h3>
     <textarea name="content" form='page' style="height:500px; width:70%; display:block; resize:none">{{ page_content }}</textarea>
-    <input type="submit" value="save">
+    <input class="doc-save" type="submit" value="save">
 
 </form>
 

@@ -1,6 +1,14 @@
 {% extends "base.html" %} 
 {% block title %}Document Page{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+{% endblock %}
+
 {% block content %}
+
+{% if document_owner %} 
+<button class="page-edit" onclick="window.location.href='{{ url_for('documents.edit_page', page_id=page_id) }}'">edit</button>
+{% endif %}
 {{ html_content|safe }}
 {% endblock %} 
