@@ -14,7 +14,7 @@ def home():
     cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
     ratings_temp=cursor.fetchall()
     ratings=[]
-    for i, rating in enumerate(ratings_temp):
+    for rating in ratings_temp:
         cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (rating[1],))
         username = cursor.fetchone()[0]
         rating = [rating[0], username]

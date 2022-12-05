@@ -8,11 +8,11 @@ bp = Blueprint('documents', __name__)
 def document_view(document_id, page_id=None):
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=?', (document_id,))
-    res = cursor.fetchone()
+    account_id, public = cursor.fetchone()
 
-    document_owner = True if 'userid' in session and session['userid']==res[0] else False
+    document_owner = True if 'userid' in session and session['userid']==account_id else False
 
-    if res[1]==0 and not document_owner:
+    if public==False and not document_owner:
         return 'the document you attempted to view is private'
 
     cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
@@ -24,11 +24,11 @@ def document_view(document_id, page_id=None):
 def page_view(page_id):
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
-    res = cursor.fetchone()
+    account_id, public = cursor.fetchone()
 
-    document_owner = True if 'userid' in session and session['userid']==res[0] else False
+    document_owner = True if 'userid' in session and session['userid']==account_id else False
 
-    if res[1]==0 and not document_owner:
+    if public==False and not document_owner:
         return 'the document you attempted to view is private'
 
     cursor = db_conn.execute('SELECT content FROM LorePage WHERE PageID=?', (page_id,))
@@ -63,11 +63,7 @@ def edit_page(page_id):
     db_conn = sqlite3.connect('./db/prototype.db')
     # need to add document id here
     cursor = db_conn.execute('SELECT LoreDocument.AccountID, LorePage.DocumentID, LorePage.Name, LorePage.Content FROM LorePage INNER JOIN LoreDocument ON LorePage.DocumentID=LoreDocument.DocumentID WHERE PageID=? ', (page_id,))
-    res = cursor.fetchone()
-    account_id=res[0]
-    document_id=res[1]
-    page_title=res[2]
-    page_content=res[3]
+    account_id, document_id, page_title, page_content = cursor.fetchone()
 
     if 'userid' not in session or session['userid']!=account_id:
         return 'You do not own the document this page is attached to'
@@ -81,4 +77,4 @@ def edit_page(page_id):
         cursor = db_conn.execute('UPDATE LorePage SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
         db_conn.commit()
 
-        return redirect(url_for('documents.page_view', document_id=document_id))
+        return redirect(url_for('documents.page_view', page_id=page_id))
