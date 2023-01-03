@@ -7,15 +7,19 @@ bp = Blueprint('auth', __name__)
 @bp.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
+
+        # assign the data provided in the form to variables
         email = request.form['email']
         password = request.form['password']
-        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest() # instantly hash/encrypt the password with sha256 to hexadecimal
 
+        # create an sqlite connection and check if the entered account details exist and match within the database
         db_conn = sqlite3.connect('./db/prototype.db')
         cursor = db_conn.execute('SELECT AccountID, Username FROM User WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
 
+        # if the entered details were correct, create a session and redirect the user to the home page
         if res:
             account_id, username = res
             session['loggedin'] = True
@@ -25,6 +29,8 @@ def login():
 
             return redirect(url_for('main.home'))
         else:
+            # reload the login page but with an error message
+            # err_msg will be inserted into the login.html template by jinja
             return render_template('login.html', err_msg='Incorrect Username or Password')
     
     if 'loggedin' in session:
