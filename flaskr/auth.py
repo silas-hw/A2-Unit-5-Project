@@ -13,15 +13,15 @@ def login():
 
         db_conn = sqlite3.connect('./db/prototype.db')
         cursor = db_conn.execute('SELECT AccountID, Username FROM User WHERE Email=? AND Password=?', (email, password_hash))
-        account_id, username = cursor.fetchone()
+        res = cursor.fetchone()
         db_conn.close()
 
         if res:
+            account_id, username = res
             session['loggedin'] = True
             session['userid'] = account_id
             session['username'] = username
             session['email'] = email
-            
 
             return redirect(url_for('main.home'))
         else:
