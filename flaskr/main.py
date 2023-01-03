@@ -7,6 +7,10 @@ bp = Blueprint('main', __name__)
 @bp.route('/home/', methods=['GET'])
 @bp.route('/landingpage/', methods=['GET'])
 def home():
+    '''
+    returns the homepage to users who are not logged in and redirects logged in users to their dashboard
+    '''
+
     if 'loggedin' in session:
         return redirect(url_for('main.dashboard'))
 
@@ -25,6 +29,10 @@ def home():
 @bp.route('/', methods=['GET'])
 @bp.route('/dashboard/', methods=['GET'])
 def dashboard():
+    '''
+    returns the dashboard to users who are logged in and redirects not logged in users to the homepage
+    '''
+
     if 'loggedin' not in session:
         return redirect(url_for('main.home'))
     return render_template('dashboard.html', session=session)

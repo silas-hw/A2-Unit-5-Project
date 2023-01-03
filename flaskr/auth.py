@@ -6,9 +6,14 @@ bp = Blueprint('auth', __name__)
 
 @bp.route('/login/', methods=['GET', 'POST'])
 def login():
+    '''
+    Used for a user to 'log in' to an account they have already created using their
+    email and password.
+    '''
+
     if 'loggedin' in session:
         return redirect(url_for('main.home'))
-        
+
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 
         # assign the data provided in the form to variables
@@ -40,6 +45,11 @@ def login():
 
 @bp.route('/logout/', methods=['GET'])
 def logout():
+    '''
+    Used for a user to 'log out' from their account if they are already logged in.
+    '''
+
+    # remove all the user details from the current session if they are already loggedin (i.e. 'log them out')
     if 'loggedin' in session:
         session.pop('loggedin')
         session.pop('userid')
@@ -50,27 +60,44 @@ def logout():
 
 @bp.route('/register/', methods=['GET', 'POST'])
 def register():
+    '''
+    Allows the user to create a new account and access the features of the website that require an account
+    to use.
+    '''
+    
     if request.method == 'GET':
         return render_template('register.html', err_msg='')
     elif request.method == 'POST':
+        # the user cannot register for an account if they are already logged in
         if 'loggedin' in session:
             return redirect(url_for('main.home'))
 
+        # assign entered details to variables
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        newsletter = 1 if request.form['newsletter'] == "1" else 0
+
+        # forms can only send string data, so here we convert it to an integer
+        # Whilst we could technically just cast it using the int method, this way
+        # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
+        newsletter = 1 if request.form['newsletter'] == "1" else 0 
+
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+        # create an sqlite connection to check if the account already exists
         db_conn = sqlite3.connect('./db/prototype.db')
         cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
         res = cursor.fetchone()
 
+        # if the account already exists reload the register page but with an error message
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')
         
+        # insert the new account information into the User table within the database
         db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
         db_conn.commit()
+
+        # create a session for the user, automatically logging them in upon account creation
         userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
         db_conn.close()
 

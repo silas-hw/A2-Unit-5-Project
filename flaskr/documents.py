@@ -1,3 +1,5 @@
+# Note: for an understanding of how the terms 'document' and 'page' relate to each other in this context refer to the design document
+
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 import markdown
@@ -6,6 +8,10 @@ bp = Blueprint('documents', __name__)
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 def document_view(document_id, page_id=None):
+    '''
+    Provides the user with a view of all of the pages stored within a document
+    '''
+
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=?', (document_id,))
     account_id, public = cursor.fetchone()
@@ -22,6 +28,11 @@ def document_view(document_id, page_id=None):
 
 @bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
 def page_view(page_id):
+    '''
+    Displays the content of a page to a user, whether it be within one of their own documents or within
+    a publically shared document
+    '''
+
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
     account_id, public = cursor.fetchone()
@@ -39,6 +50,10 @@ def page_view(page_id):
 
 @bp.route('/page/add/<document_id>/', methods=['GET', 'POST'])
 def add_page(document_id):
+    '''
+    Used when a user decides to add a page to one of their documents
+    '''
+
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
@@ -60,6 +75,10 @@ def add_page(document_id):
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 def edit_page(page_id):
+    '''
+    Allows the user to edit the content of a page within one of their own documents
+    '''
+    
     db_conn = sqlite3.connect('./db/prototype.db')
     # need to add document id here
     cursor = db_conn.execute('SELECT LoreDocument.AccountID, LorePage.DocumentID, LorePage.Name, LorePage.Content FROM LorePage INNER JOIN LoreDocument ON LorePage.DocumentID=LoreDocument.DocumentID WHERE PageID=? ', (page_id,))

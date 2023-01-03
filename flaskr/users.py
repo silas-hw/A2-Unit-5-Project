@@ -5,6 +5,10 @@ bp = Blueprint('users', __name__)
 
 @bp.route('/account/<account_id>', methods=['GET'])
 def account(account_id):
+    '''
+    Displays information relating to an account of a given account id
+    '''
+
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id))
     res = cursor.fetchone()

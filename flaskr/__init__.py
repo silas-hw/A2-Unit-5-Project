@@ -8,6 +8,11 @@ from .users import bp as users_bp
 from .documents import bp as documents_bp
 
 def create_app(test_config=None):
+    '''
+    Constructs the application from all of the blueprints provided. 
+    This is used by flask when passing the 'flask run' command in the commandline.
+    '''
+
     app = Flask(__name__)
 
     app.secret_key = 'secretekeygoeshere'
