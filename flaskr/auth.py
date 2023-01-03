@@ -6,6 +6,9 @@ bp = Blueprint('auth', __name__)
 
 @bp.route('/login/', methods=['GET', 'POST'])
 def login():
+    if 'loggedin' in session:
+        return redirect(url_for('main.home'))
+        
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 
         # assign the data provided in the form to variables
@@ -32,9 +35,6 @@ def login():
             # reload the login page but with an error message
             # err_msg will be inserted into the login.html template by jinja
             return render_template('login.html', err_msg='Incorrect Username or Password')
-    
-    if 'loggedin' in session:
-        return redirect(url_for('main.home'))
 
     return render_template('login.html', err_msg='')
 
