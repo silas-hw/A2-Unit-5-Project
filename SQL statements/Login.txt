@@ -1,1 +1,0 @@
-SELECT rowid, Username FROM users WHERE Email=? AND Password=?', (email, password);
