@@ -1,0 +1,22 @@
+{% extends "base.html" %} 
+{% block title %}My Documents{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<button class="add-document" onclick="window.location.href='{{ url_for('documents.add_document') }}'">Create New Document</button>
+<h1>You have made <b>{{ num_docs }}</b> documents</h1>
+
+<div class="documents-grid-container">
+    {% for document in documents %}
+    <div class="document">
+        <h2><a href="{{ url_for('documents.document_view', document_id=document[3]) }}"> {{ document[0] }} </a></h2>
+        <p>{{ document[1] }} </p>
+        <p>Public: {% if document[2] %} yes {% else %} no {% endif %}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

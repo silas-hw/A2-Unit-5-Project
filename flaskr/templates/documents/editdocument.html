@@ -1,0 +1,26 @@
+{% extends "base.html" %} 
+{% block title %}Add Page{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+{% endblock %}
+
+{% block content %} 
+
+{% if action=='add' %}
+<form id='document' action="{{ url_for('documents.add_document') }}" method="post">
+{% elif action=='edit' %}
+<form id='document' action="{{ url_for('documents.edit_document', document_id=document_id) }}" method="post">
+{% endif %}
+
+    <h3>Document Title</h3>
+    <input type="text" name="title" style="display:block" value="{{ doc_title }}" required>
+    <h3>Description</h3>
+    <textarea name="description" form='document' style="height:500px; width:70%; display:block; resize:none">{{ doc_description }}</textarea>
+    <input type="checkbox" name="public" id="public" value="1">
+    <label for="public">public</label>
+    <input class="doc-save" type="submit" value="save">
+
+</form>
+
+{% endblock %} 
