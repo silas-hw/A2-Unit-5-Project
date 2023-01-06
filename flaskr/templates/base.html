@@ -38,6 +38,30 @@
         {% endif %}
     </div>
 
+    {% if 'loggedin' in session %}
+
+    <div class="sidebar">
+        <div class="sidebar-widget">
+            <a href="{{ url_for('documents.my_documents') }}">My Documents</a>
+        </div>
+        
+        <div class="sidebar-widget">
+            <a>Community</a>
+        </div>
+
+        <div class="sidebar-widget">
+            <a>Membership</a>
+        </div>
+
+        <a><i>About us</i></a>
+        <a><i>Admin Portal</i></a>
+        <a><i>Newsletter Settings</i></a>
+        <a><i>Terms & Conditions</i></a>
+        <a><i>Delete Account</i></a>
+    </div>
+
+    {% endif %}
+
     {% block outer %} 
     {% endblock %}
 

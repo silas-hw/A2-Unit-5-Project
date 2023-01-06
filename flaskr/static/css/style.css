@@ -21,6 +21,10 @@ body {
     margin: 0 0 0 0;
 }
 
+a, a:visited, a:hover, a:active {
+    color: inherit;
+}
+
 input {
     border-radius: var(--main-border-radius);
     border: 0px;
@@ -230,8 +234,51 @@ div.navbar-register {
 }
 
 div.content {
-    width:80%;
+    width:70%;
     margin: auto;
+}
+
+/* sidebar */
+
+div.sidebar {
+    position: fixed;
+
+    float: left;
+    padding-top: 30px;
+
+    height: 100%;
+    width: 200px;
+    
+    background-color: var(--secondary-background-color);
+
+}
+
+div.sidebar > a {
+    display: block;
+
+    margin-left: 10px;
+    margin-top: 5px;
+    color: rgb(68, 68, 68);
+
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: 400;
+
+}
+
+div.sidebar-widget {
+    border-radius: 0px var(--main-border-radius) var(--main-border-radius) 0px;
+    background-color: var(--primary-highlight-color);
+    color: white;
+    
+    width: 60%;
+
+    padding: 20px;
+    margin-top: 12px;
+    float: left;
+}
+
+div.sidebar-widget > a {
+    text-decoration: none;
 }
 
 /*
