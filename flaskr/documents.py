@@ -6,6 +6,22 @@ import markdown
 
 bp = Blueprint('documents', __name__)
 
+@bp.route('/mydocuments/', methods=['GET'])
+def my_documents():
+    '''
+    Lists all of the users documents
+    '''
+
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM LoreDocument WHERE AccountID=?', (session['userid'],))
+    documents = cursor.fetchall()
+
+    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
+    num_docs = cursor.fetchone()[0]
+
+    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs)
+
+
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 def document_view(document_id, page_id=None):
     '''
@@ -25,6 +41,35 @@ def document_view(document_id, page_id=None):
     pages = cursor.fetchall()
 
     return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id)
+
+@bp.route('/document/add/', methods=['GET', 'POST'])
+def add_document():
+    '''
+    Used when a user decides to create a new document
+    '''
+
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
+    num_docs = cursor.fetchone()[0]
+
+    cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel FROM Membership WHERE AccountID=?)', (session['userid'],))
+    doc_limit = cursor.fetchone()[0]
+
+    if doc_limit>0:
+        if num_docs == doc_limit:
+            return redirect(url_for('documents.my_documents'))
+
+    if request.method=='GET':
+        return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
+    elif request.method=='POST':
+        document_name = request.form['title']
+        document_description = request.form['description']
+        document_public = 1 if 'public' in request.form else 0
+
+        cursor = db_conn.execute('INSERT INTO LoreDocument (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
+        db_conn.commit()
+
+        return redirect(url_for('documents.my_documents'))
 
 @bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
 def page_view(page_id):
