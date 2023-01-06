@@ -6,6 +6,10 @@ import markdown
 
 bp = Blueprint('documents', __name__)
 
+#############
+# DOCUMENTS #
+#############
+
 @bp.route('/mydocuments/', methods=['GET'])
 def my_documents():
     '''
@@ -70,6 +74,10 @@ def add_document():
         db_conn.commit()
 
         return redirect(url_for('documents.my_documents'))
+
+#############
+# PAGES #
+#############
 
 @bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
 def page_view(page_id):
