@@ -24,6 +24,7 @@ def home():
         rating = [rating[0], username]
         ratings.append(rating)
     
+    db_conn.close()
     return render_template('home.html', session=session, ratings=ratings)
 
 @bp.route('/', methods=['GET'])

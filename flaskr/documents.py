@@ -22,6 +22,7 @@ def my_documents():
 
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
+    db_conn.close()
 
     return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs)
 
@@ -39,10 +40,12 @@ def document_view(document_id, page_id=None):
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
+        db_conn.close()
         return 'the document you attempted to view is private'
 
     cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
+    db_conn.close()
 
     return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id)
 
@@ -61,9 +64,11 @@ def add_document():
 
     if doc_limit>0:
         if num_docs == doc_limit:
+            db_conn.close()
             return redirect(url_for('documents.my_documents'))
 
     if request.method=='GET':
+        db_conn.close()
         return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
     elif request.method=='POST':
         document_name = request.form['title']
@@ -72,6 +77,7 @@ def add_document():
 
         cursor = db_conn.execute('INSERT INTO LoreDocument (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
         db_conn.commit()
+        db_conn.close()
 
         return redirect(url_for('documents.my_documents'))
 
@@ -93,12 +99,15 @@ def page_view(page_id):
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
+        db_conn.close()
         return 'the document you attempted to view is private'
 
     cursor = db_conn.execute('SELECT content FROM LorePage WHERE PageID=?', (page_id,))
-    
+    db_conn.close()
+
     md_content = cursor.fetchone()[0]
-    html_content = markdown.markdown(md_content)
+    html_content = markdown.markdown(md_content)\
+    
     return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
 
 @bp.route('/page/add/<document_id>/', methods=['GET', 'POST'])
@@ -112,9 +121,11 @@ def add_page(document_id):
     account_id = cursor.fetchone()[0]
 
     if 'userid' not in session or session['userid']!=account_id:
+        db_conn.close()
         return 'You do not own this document'
 
     if request.method=='GET':
+        db_conn.close()
         return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
 
     elif request.method=='POST':
@@ -123,6 +134,7 @@ def add_page(document_id):
 
         cursor = db_conn.execute('INSERT INTO LorePage (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
         db_conn.commit()
+        db_conn.close()
 
         return redirect(url_for('documents.page_view', document_id=document_id))
 
@@ -138,9 +150,11 @@ def edit_page(page_id):
     account_id, document_id, page_title, page_content = cursor.fetchone()
 
     if 'userid' not in session or session['userid']!=account_id:
+        db_conn.close()
         return 'You do not own the document this page is attached to'
 
     if request.method=='GET':
+        db_conn.close()
         return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit')
     elif request.method=='POST':
         title = request.form['title']
@@ -148,5 +162,6 @@ def edit_page(page_id):
 
         cursor = db_conn.execute('UPDATE LorePage SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
         db_conn.commit()
-
+        db_conn.close()
+        
         return redirect(url_for('documents.page_view', page_id=page_id))
