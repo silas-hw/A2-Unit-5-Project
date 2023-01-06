@@ -10,6 +10,7 @@
 </head>
 <body>
     <div class="navbar">
+        <a href="{{ url_for('main.home') }}"><img style="object-fit: scale-down; height:90%; margin-left:15px;" src="{{ url_for('static', filename='img/logo.png') }}"></a>
         {% if 'loggedin' in session %}
         <div class="navbar-account">
             <div class="navbar-link-container">
