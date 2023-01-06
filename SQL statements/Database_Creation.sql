@@ -13,6 +13,33 @@ CREATE TABLE User (
     FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessID)
 );
 
+CREATE TABLE MembershipLevel (
+    MembershipLevel INTEGER NOT NULL PRIMARY KEY,
+
+    Name VARCHAR(64) NOT NULL UNIQUE,
+    Description VARCHAR(255) NOT NULL UNIQUE,
+
+    DocumentLimit INT NOT NULL,
+    PageLimit INT NOT NULL,
+    Price INT NOT NULL CHECK(Price>=0)
+);
+
+INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('standard', 'The standard free account you can get just by signing up', 15, 50, 0);
+INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('premium', 'The paid membership that gives you unlimited documents and pages', -1, -1, 10);
+
+CREATE TABLE Membership (
+    MembershipID INTEGER NOT NULL PRIMARY KEY,
+
+    DateStartedEpoch INT NOT NULL,
+
+    MembershipLevel INT NOT NULL DEFAULT 1,
+
+    AccountID INT NOT NULL,
+
+    FOREIGN KEY(MembershipLevel) REFERENCES MembershipLevel(MembershipLevel),
+    FOREIGN KEY(AccountID) REFERENCES User(AccountID)
+);
+
 CREATE TABLE AccessLevel (
     AccessID INTEGER PRIMARY KEY,
     Name VARCHAR(10) NOT NULL,
