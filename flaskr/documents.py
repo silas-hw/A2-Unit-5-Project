@@ -103,10 +103,10 @@ def page_view(page_id):
         return 'the document you attempted to view is private'
 
     cursor = db_conn.execute('SELECT content FROM LorePage WHERE PageID=?', (page_id,))
-    db_conn.close()
-
     md_content = cursor.fetchone()[0]
-    html_content = markdown.markdown(md_content)\
+    db_conn.close()
+    
+    html_content = markdown.markdown(md_content)
     
     return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
 
@@ -136,7 +136,7 @@ def add_page(document_id):
         db_conn.commit()
         db_conn.close()
 
-        return redirect(url_for('documents.page_view', document_id=document_id))
+        return redirect(url_for('documents.document_view', document_id=document_id))
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 def edit_page(page_id):
