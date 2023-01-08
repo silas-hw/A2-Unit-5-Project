@@ -29,6 +29,16 @@ button.add-document {
     float: right;
 }
 
+button.delete-document {
+    border-radius: var(--main-border-radius);
+    background-color: rgb(231, 112, 112);
+    color: white;
+
+    display: block;
+
+    float: right;
+}
+
 /* 
     page list view
 */

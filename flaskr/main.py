@@ -1,19 +1,18 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 
+from .decorators import *
+
 bp = Blueprint('main', __name__)
 
 @bp.route('/', methods=['GET'])
 @bp.route('/home/', methods=['GET'])
 @bp.route('/landingpage/', methods=['GET'])
+@check_loggedout
 def home():
     '''
     returns the homepage to users who are not logged in and redirects logged in users to their dashboard
     '''
-
-    if 'loggedin' in session:
-        return redirect(url_for('main.dashboard'))
-
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
     ratings_temp=cursor.fetchall()
@@ -29,11 +28,9 @@ def home():
 
 @bp.route('/', methods=['GET'])
 @bp.route('/dashboard/', methods=['GET'])
+@check_loggedin
 def dashboard():
     '''
     returns the dashboard to users who are logged in and redirects not logged in users to the homepage
     '''
-
-    if 'loggedin' not in session:
-        return redirect(url_for('main.home'))
     return render_template('dashboard.html', session=session)

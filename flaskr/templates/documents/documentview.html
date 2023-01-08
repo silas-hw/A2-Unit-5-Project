@@ -9,6 +9,7 @@
 <div class="page-list">
     {% if document_owner %}
     <button class="add-page" onclick="window.location.href='{{ url_for('documents.add_page', document_id=document_id) }}'">Add page</button>
+    <button class="delete-doc" onclick="window.location.href='{{ url_for('documents.delete_document', document_id=document_id) }}'">Delete</button>
     {% endif %} 
 
     {% for page in pages %} 

@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 import sqlite3
 import hashlib
 
+from .decorators import *
+
 bp = Blueprint('auth', __name__)
 
 @bp.route('/login/', methods=['GET', 'POST'])
@@ -44,21 +46,22 @@ def login():
     return render_template('login.html', err_msg='')
 
 @bp.route('/logout/', methods=['GET'])
+@check_loggedin
 def logout():
     '''
     Used for a user to 'log out' from their account if they are already logged in.
     '''
 
     # remove all the user details from the current session if they are already loggedin (i.e. 'log them out')
-    if 'loggedin' in session:
-        session.pop('loggedin')
-        session.pop('userid')
-        session.pop('username')
-        session.pop('email')
+    session.pop('loggedin')
+    session.pop('userid')
+    session.pop('username')
+    session.pop('email')
     
     return redirect(url_for('main.home'))
 
 @bp.route('/register/', methods=['GET', 'POST'])
+@check_loggedout
 def register():
     '''
     Allows the user to create a new account and access the features of the website that require an account

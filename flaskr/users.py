@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 
+from .decorators import *
+
 bp = Blueprint('users', __name__)
 
 @bp.route('/account/<account_id>', methods=['GET'])
+@check_loggedin
 def account(account_id):
     '''
     Displays information relating to an account of a given account id
