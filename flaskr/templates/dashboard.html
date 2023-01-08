@@ -3,4 +3,14 @@
 
 {% block content %} 
 <p>Welcome, {{ session['username'] }}</p> 
+
+{% for doc in recent_docs %} 
+
+<a href="{{ url_for('documents.document_view', document_id=doc['document_id']) }}">
+    <h3>{{ doc['title'] }}</h3>
+    <p>Created by: <i>{{ doc['username'] }}</i></p>
+    <p>{{ doc['description'][0:128] }}...</p>
+</a>
+
+{% endfor %}
 {% endblock %}

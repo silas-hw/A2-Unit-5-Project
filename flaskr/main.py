@@ -33,4 +33,20 @@ def dashboard():
     '''
     returns the dashboard to users who are logged in and redirects not logged in users to the homepage
     '''
-    return render_template('dashboard.html', session=session)
+
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM LoreDocument WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
+    res = cursor.fetchall()
+    recent_docs=[]
+    for doc in res:
+        cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (doc[2],))
+        username = cursor.fetchone()[0]
+
+        recent_docs.append({
+            'username':username,
+            'title':doc[0],
+            'description':doc[1],
+            'document_id':doc[3]
+        })
+
+    return render_template('dashboard.html', session=session, recent_docs=recent_docs)

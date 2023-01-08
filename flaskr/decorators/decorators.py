@@ -6,10 +6,10 @@ def check_loggedin(func):
     This can be used to 'wrap' any route in the website to ensure only logged in users can access it
     '''
     @functools.wraps(func)
-    def wrapper():
+    def wrapper(*args, **kwargs):
         if 'loggedin' not in session:
             return redirect(url_for('main.home'))
-        return func()
+        return func(*args, **kwargs)
     return wrapper
 
 def check_loggedout(func):
@@ -17,8 +17,8 @@ def check_loggedout(func):
     This can be used to 'wrap' any route in the website to ensure only logged in users can access it
     '''
     @functools.wraps(func)
-    def wrapper():
+    def wrapper(*args, **kwargs):
         if 'loggedin' in session:
             return redirect(url_for('main.dashboard'))
-        return func()
+        return func(*args, **kwargs)
     return wrapper

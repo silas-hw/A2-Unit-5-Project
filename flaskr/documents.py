@@ -33,7 +33,7 @@ def my_documents():
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin
-def document_view(document_id, page_id=None):
+def document_view(document_id):
     '''
     Provides the user with a view of all of the pages stored within a document
     '''
