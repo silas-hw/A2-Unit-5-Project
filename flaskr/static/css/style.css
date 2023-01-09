@@ -236,6 +236,7 @@ div.navbar-register {
 div.content {
     width:70%;
     margin: auto;
+    padding-left: 40px;
 }
 
 /* sidebar */
