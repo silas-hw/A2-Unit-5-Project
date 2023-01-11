@@ -8,7 +8,10 @@
 {% block content %}
 
 {% if document_owner %} 
-<button class="page-edit" onclick="window.location.href='{{ url_for('documents.edit_page', page_id=page_id) }}'">edit</button>
+<div class="doc-button-container">
+    <button class="edit-document" onclick="window.location.href='{{ url_for('documents.edit_page', page_id=page_id) }}'">edit</button>
+    <button class="delete-document" onclick="window.location.href='{{ url_for('documents.delete_page', page_id=page_id) }}'">delete</button>
+</div>
 {% endif %}
 {{ html_content|safe }}
 {% endblock %} 

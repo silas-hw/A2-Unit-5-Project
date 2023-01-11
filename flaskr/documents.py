@@ -39,8 +39,8 @@ def document_view(document_id):
     '''
 
     db_conn = sqlite3.connect('./db/prototype.db')
-    cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=?', (document_id,))
-    account_id, public = cursor.fetchone()
+    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    account_id, public, title, description = cursor.fetchone()
 
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
@@ -52,7 +52,7 @@ def document_view(document_id):
     pages = cursor.fetchall()
     db_conn.close()
 
-    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id)
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description)
 
 @bp.route('/document/add/', methods=['GET', 'POST'])
 @check_loggedin
@@ -87,6 +87,38 @@ def add_document():
 
         return redirect(url_for('documents.my_documents'))
 
+@bp.route('/document/edit/<document_id>', methods=['GET', 'POST'])
+@check_loggedin
+def edit_document(document_id):
+    '''
+    Used when a user decides to edit a document they own
+    '''
+    db_conn = sqlite3.connect('./db/prototype.db')
+
+    cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    account_id = cursor.fetchone()[0]
+
+    if session['userid'] != account_id:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    if request.method=='GET':
+        cursor = db_conn.execute('SELECT DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
+        title, description = cursor.fetchone()
+        return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
+    elif request.method=='POST':
+        document_name = request.form['title']
+        document_description = request.form['description']
+        document_public = 1 if 'public' in request.form else 0
+
+        cursor = db_conn.execute('UPDATE LoreDocument SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
+        db_conn.commit()
+        db_conn.close()
+
+        print('done')
+
+        return redirect(url_for('documents.my_documents'))
+
 @bp.route('/document/delete/<document_id>/', methods=['GET'])
 @check_loggedin
 def delete_document(document_id):
@@ -111,7 +143,7 @@ def delete_document(document_id):
     return redirect(url_for('documents.my_documents'))
 
 #############
-# PAGES #
+# PAGES     #
 #############
 
 @bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
@@ -181,7 +213,7 @@ def edit_page(page_id):
     cursor = db_conn.execute('SELECT LoreDocument.AccountID, LorePage.DocumentID, LorePage.Name, LorePage.Content FROM LorePage INNER JOIN LoreDocument ON LorePage.DocumentID=LoreDocument.DocumentID WHERE PageID=? ', (page_id,))
     account_id, document_id, page_title, page_content = cursor.fetchone()
 
-    if 'userid' not in session or session['userid']!=account_id:
+    if session['userid']!=account_id:
         db_conn.close()
         return 'You do not own the document this page is attached to'
 
@@ -197,3 +229,24 @@ def edit_page(page_id):
         db_conn.close()
         
         return redirect(url_for('documents.page_view', page_id=page_id))
+
+@bp.route('/page/delete/<page_id>/', methods=['GET'])
+@check_loggedin
+def delete_page(page_id):
+    '''
+    Used to delete a document and its associated pages
+    '''
+    
+    db_conn = sqlite3.connect('./db/prototype.db')
+    cursor = db_conn.execute('SELECT AccountID, DocumentID FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
+    page_account_id, document_id = cursor.fetchone()
+
+    if session['userid'] != page_account_id:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    cursor = db_conn.execute('DELETE FROM LorePage WHERE PageID=?', (page_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('documents.document_view', document_id=document_id))

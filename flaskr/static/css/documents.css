@@ -29,16 +29,6 @@ button.add-document {
     float: right;
 }
 
-button.delete-document {
-    border-radius: var(--main-border-radius);
-    background-color: rgb(231, 112, 112);
-    color: white;
-
-    display: block;
-
-    float: right;
-}
-
 /* 
     page list view
 */
@@ -53,11 +43,6 @@ a.page-link {
     margin: 5px;
 }
 
-button.add-page {
-    float: right;
-    margin-top: 10px;
-}
-
 input.doc-save {
     padding: 10px 5px 10px 5px;
     background-color: var(--primary-highlight-color);
@@ -65,9 +50,44 @@ input.doc-save {
 }
 
 button.page-edit {
+    border-radius: var(--main-border-radius);
+    background-color: var(--primary-highlight-color);
+    color: white;
+}
+
+button.edit-document {
+    border-radius: var(--main-border-radius);
+    background-color: var(--secondary-highlight-color);
+    color: white;
+
+    display: block;
+
+    margin-top: 5px;
+    width: 100%
+}
+
+button.delete-document {
+    border-radius: var(--main-border-radius);
+    background-color: rgb(231, 112, 112);
+    color: white;
+
+    display: block;
+
+    margin-top: 5px;
+    width: 100%
+}
+
+button.add-page {
+    border-radius: var(--main-border-radius);
     background-color: var(--primary-highlight-color);
     color: white;
 
-    float: right;
+    display: block;
 
+    margin-top: 5px;
+    width: 100%
+}
+
+div.doc-button-container {
+    float: right
 }

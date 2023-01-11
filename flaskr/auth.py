@@ -71,9 +71,8 @@ def register():
     if request.method == 'GET':
         return render_template('register.html', err_msg='')
     elif request.method == 'POST':
-        # the user cannot register for an account if they are already logged in
-        if 'loggedin' in session:
-            return redirect(url_for('main.home'))
+        if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
+            return render_template('register.html', err_msg='Please enter all data')
 
         # assign entered details to variables
         username = request.form['username']
@@ -83,7 +82,7 @@ def register():
         # forms can only send string data, so here we convert it to an integer
         # Whilst we could technically just cast it using the int method, this way
         # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
-        newsletter = 1 if request.form['newsletter'] == "1" else 0 
+        newsletter = 1 if "newsletter" in request.form else 0 
 
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
@@ -91,7 +90,7 @@ def register():
         db_conn = sqlite3.connect('./db/prototype.db')
         cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
         res = cursor.fetchone()
-
+        
         # if the account already exists reload the register page but with an error message
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')

@@ -8,10 +8,16 @@
 {% block content %}
 <div class="page-list">
     {% if document_owner %}
-    <button class="add-page" onclick="window.location.href='{{ url_for('documents.add_page', document_id=document_id) }}'">Add page</button>
-    <button class="delete-doc" onclick="window.location.href='{{ url_for('documents.delete_document', document_id=document_id) }}'">Delete</button>
-    {% endif %} 
 
+    <div class="doc-button-container">
+        <button class="edit-document" onclick="window.location.href='{{ url_for('documents.edit_document', document_id=document_id) }}'">Edit</button>
+        <button class="add-page" onclick="window.location.href='{{ url_for('documents.add_page', document_id=document_id) }}'">Add page</button>
+        <button class="delete-document" onclick="window.location.href='{{ url_for('documents.delete_document', document_id=document_id) }}'">Delete</button>
+    </div>
+    
+    {% endif %} 
+    <h1> {{ title }} </h1>
+    <p> {{ description }} </p>
     {% for page in pages %} 
         <a class="page-link" href="{{ url_for('documents.page_view', page_id=page[0]) }}">{{ page[1] }}</a>
     {% endfor %}
