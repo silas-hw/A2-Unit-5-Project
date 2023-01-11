@@ -1,3 +1,14 @@
+--- MY DOCUMENTS ---
+
+--- get a list of all the documents that the currently logged in
+--- user has created
+SELECT DocumentName, Description, Public, DocumentID FROM LoreDocument WHERE AccountID=?, (session['userid'],)
+
+--- count how many documents the currently logged in user
+--- has created
+SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?, (session['userid'],)
+
+
 --- DOCUMENT VIEW ---
 
 --- used to check if the currently logged in user has access to the 
@@ -6,6 +17,33 @@ SELECT AccountID, public FROM LoreDocument WHERE DocumentID=?, (document_id,)
 
 --- used to output the pages associated with a particular document
 SELECT PageID, Name FROM LorePage WHERE DocumentID=?, (document_id,)
+
+
+--- ADD DOCUMENT ---
+
+--- count how many documents the currently logged in user
+--- has created
+SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?, (session['userid'],)
+
+--- check how many documents the current user can create depending
+--- on their membership level
+SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel FROM Membership WHERE AccountID=?), (session['userid'],)
+
+--- add the new document to the database 
+INSERT INTO LoreDocument (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?), (document_name, document_description, document_public, session['userid'])
+
+
+--- DELETE DOCUMENT ---
+
+--- used to check if the user owns th
+e document
+SELECT AccountID FROM LoreDocument WHERE DocumentID=?, (document_id,)
+
+--- delete all the pages associated with the document
+DELETE FROM LorePage WHERE DocumentID=?, (document_id,)
+
+--- delete the document itself
+DELETE FROM LoreDocument WHERE DocumentID=?, (document_id,)
 
 
 --- PAGE VIEW ---
