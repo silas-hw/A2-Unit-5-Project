@@ -3,12 +3,23 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 
 <button class="add-document" onclick="window.location.href='{{ url_for('documents.add_document') }}'">Create New Document</button>
 <h1>You have made <b>{{ num_docs }}</b> documents</h1>
+
+<form>
+    <input id="search" class="search" type="text">
+</form>
+
+<button onclick="search()">search</button>
+
+{% if search_query %} 
+<p>Showing documents matching <i>{{ search_query }}</i></p>
+{% endif %} 
 
 <div class="documents-grid-container">
     {% for document in documents %}

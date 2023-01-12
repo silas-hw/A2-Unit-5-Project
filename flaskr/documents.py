@@ -28,7 +28,17 @@ def my_documents():
     num_docs = cursor.fetchone()[0]
     db_conn.close()
 
-    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs)
+    search_query = request.args.get('q')
+    if search_query:
+        temp_docs = []
+        for i, doc in enumerate(documents):
+            print(doc[0], search_query in doc[0])
+            if search_query in doc[0]:
+                temp_docs.append(doc)
+        documents=temp_docs
+
+
+    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, search_query=search_query)
 
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
