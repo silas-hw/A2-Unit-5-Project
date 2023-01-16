@@ -47,6 +47,7 @@ def document_view(document_id):
     '''
     Provides the user with a view of all of the pages stored within a document
     '''
+    print(session['access'])
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
@@ -60,9 +61,10 @@ def document_view(document_id):
 
     cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
+
     db_conn.close()
 
-    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description)
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, session=session)
 
 @bp.route('/document/add/', methods=['GET', 'POST'])
 @check_loggedin
@@ -151,6 +153,17 @@ def delete_document(document_id):
     db_conn.close()
 
     return redirect(url_for('documents.my_documents'))
+
+@bp.route('/admin/privatedoc/<document_id>/', methods=['GET'])
+@check_loggedin
+def private_document(document_id):
+    if session['access'] == 2 or session['access'] == 3:
+        db_conn = sqlite3.connect('./db/prototype.db')
+        db_conn.execute('UPDATE LoreDocument SET Public=0 WHERE DocumentID=?', (document_id,))
+        db_conn.commit()
+        db_conn.close()
+
+        return redirect(url_for('main.dashboard'))
 
 #############
 # PAGES     #
