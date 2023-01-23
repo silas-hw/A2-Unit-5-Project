@@ -1,3 +1,4 @@
+from os import access
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 import hashlib
@@ -25,17 +26,18 @@ def login():
 
         # create an sqlite connection and check if the entered account details exist and match within the database
         db_conn = sqlite3.connect('./db/prototype.db')
-        cursor = db_conn.execute('SELECT AccountID, Username FROM User WHERE Email=? AND Password=?', (email, password_hash))
+        cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel FROM User WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
 
         # if the entered details were correct, create a session and redirect the user to the home page
         if res:
-            account_id, username = res
+            account_id, username, access_level = res
             session['loggedin'] = True
             session['userid'] = account_id
             session['username'] = username
             session['email'] = email
+            session['access'] = access_level
 
             return redirect(url_for('main.home'))
         else:

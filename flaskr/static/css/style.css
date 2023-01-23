@@ -175,6 +175,19 @@ div.reviews > div.review > div.review-score {
     Jinja2 Base Template
 */
 
+.search {
+    border-width: 1px;
+    border-color: rgb(96, 96, 96);
+    border-style: solid;
+    border-radius: 2px;
+
+    font-size: 1em;
+
+    padding: 6px;
+
+    width: 60%;
+}
+
 /* navbar */
 div.navbar {
     background-color: var(--navbar-color);
