@@ -45,7 +45,6 @@ def document_view(document_id):
     '''
     Provides the user with a view of all of the pages stored within a document
     '''
-    print(session['access'])
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
