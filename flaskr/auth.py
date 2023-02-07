@@ -106,6 +106,7 @@ def register():
         userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
         
         db_conn.execute('INSERT INTO Membership (MembershipLevel, AccountID, DateStartedEpoch) VALUES (?, ?, ?)', (1, userid, int(time.time())))
+        db_conn.commit()
         db_conn.close()
 
         session['loggedin'] = True
