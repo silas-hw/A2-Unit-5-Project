@@ -48,8 +48,14 @@ def document_view(document_id):
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
-    account_id, public, title, description = cursor.fetchone()
+    res = cursor.fetchone()
 
+    # if the document doesn't exist, return user to dashboard
+    if not res:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    account_id, public, title, description = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
