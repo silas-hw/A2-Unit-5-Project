@@ -182,8 +182,13 @@ def page_view(page_id):
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
-    account_id, public = cursor.fetchone()
+    res = cursor.fetchone()
 
+    if not res:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    account_id, public = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
