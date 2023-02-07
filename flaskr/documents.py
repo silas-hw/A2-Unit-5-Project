@@ -37,9 +37,7 @@ def my_documents():
                 temp_docs.append(doc)
         documents=temp_docs
 
-
     return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, search_query=search_query)
-
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin
