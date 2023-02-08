@@ -44,8 +44,15 @@ function bold() {
 
 function header(size) {
     textarea = document.getElementById('content')
-    insert_into_textarea('#'*size)
+    insert_into_textarea('#'.repeat(size)+' ')
 
-    textarea.selectionEnd+=size+1
-    textarea.selectionStart+=size+1
+    textarea.selectionEnd+=(size+1)
+    textarea.selectionStart+=(size+1)
+}
+
+function bulletpoint() {
+    textarea = document.getElementById('content')
+    insert_into_textarea('\n- ')
+    textarea.selectionEnd+=3
+    textarea.selectionStart+=3
 }
