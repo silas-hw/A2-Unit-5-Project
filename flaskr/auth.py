@@ -2,6 +2,7 @@ from os import access
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 import hashlib
+import time
 
 from .decorators import *
 
@@ -103,6 +104,9 @@ def register():
 
         # create a session for the user, automatically logging them in upon account creation
         userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
+        
+        db_conn.execute('INSERT INTO Membership (MembershipLevel, AccountID, DateStartedEpoch) VALUES (?, ?, ?)', (1, userid, int(time.time())))
+        db_conn.commit()
         db_conn.close()
 
         session['loggedin'] = True

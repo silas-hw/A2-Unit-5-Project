@@ -37,9 +37,7 @@ def my_documents():
                 temp_docs.append(doc)
         documents=temp_docs
 
-
     return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, search_query=search_query)
-
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -47,12 +45,17 @@ def document_view(document_id):
     '''
     Provides the user with a view of all of the pages stored within a document
     '''
-    print(session['access'])
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
-    account_id, public, title, description = cursor.fetchone()
+    res = cursor.fetchone()
 
+    # if the document doesn't exist, return user to dashboard
+    if not res:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    account_id, public, title, description = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
@@ -179,8 +182,13 @@ def page_view(page_id):
 
     db_conn = sqlite3.connect('./db/prototype.db')
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
-    account_id, public = cursor.fetchone()
+    res = cursor.fetchone()
 
+    if not res:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    account_id, public = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
     if public==False and not document_owner:
