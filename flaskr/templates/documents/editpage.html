@@ -3,6 +3,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+<script src="{{ url_for('static', filename='js/page_markdown.js') }}"></script>
 {% endblock %}
 
 {% block content %} 
@@ -16,7 +17,16 @@
     <h3>Page Title</h3>
     <input type="text" name="title" style="display:block" value="{{ page_title }}">
     <h3>content</h3>
-    <textarea name="content" form='page' style="height:500px; width:70%; display:block; resize:none">{{ page_content }}</textarea>
+
+    <div class="markdown-buttons-container">
+        <button type="button" onclick="italic()"><i>I</i></button>
+        <button type="button" onclick="bold()"><b>B</b></button>
+        <button type="button" onclick="header(1)">H1</button>
+        <button type="button" onclick="header(2)">H2</button>
+        <button type="button" onclick="header(3)">H3</button>
+    </div>
+
+    <textarea name="content" id="content" form='page' style="height:500px; width:70%; display:block; resize:none">{{ page_content }}</textarea>
     <input class="doc-save" type="submit" value="save">
 
 </form>
