@@ -6,6 +6,7 @@ from .auth import bp as auth_bp
 from .main import bp as main_bp
 from .users import bp as users_bp
 from .documents import bp as documents_bp
+from .admin import bp as admin_bp
 
 def create_app(test_config=None):
     '''
@@ -21,5 +22,6 @@ def create_app(test_config=None):
     app.register_blueprint(main_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(documents_bp)
+    app.register_blueprint(admin_bp)
 
     return app

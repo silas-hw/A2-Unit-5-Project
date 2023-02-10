@@ -1,0 +1,13 @@
+{% extends "base.html" %} 
+{% block title %}Admin Portal{% endblock %} 
+
+{% block head %} 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %} 
+<div class="buttons-container">
+    <button class="admin-button">Newsletters</button>
+    <button class="admin-button">View Database</button>
+</div>
+{% endblock %}
