@@ -9,8 +9,11 @@ CREATE TABLE User (
     BankAccountNum VARCHAR(17) CHECK(length(BankAccountNum) >= 8),
     BankSortCode STRING(6) CHECK(length(BankSortCode)==6),
 
+    MembershipLevel INT NOT NULL DEFAULT 1,
+
     AccessLevel INT NOT NULL DEFAULT 1,
-    FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessID)
+    FOREIGN KEY(AccessLevel) REFERENCES AccessLevel(AccessID),
+    FOREIGN KEY(MembershipLevel) REFERENCES MembershipLevel(MembershipLevel)
 );
 
 CREATE TABLE MembershipLevel (
@@ -27,24 +30,15 @@ CREATE TABLE MembershipLevel (
 INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('standard', 'The standard free account you can get just by signing up', 15, 50, 0);
 INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('premium', 'The paid membership that gives you unlimited documents and pages', -1, -1, 10);
 
-CREATE TABLE Membership (
-    MembershipID INTEGER NOT NULL PRIMARY KEY,
-
-    DateStartedEpoch INT NOT NULL,
-
-    MembershipLevel INT NOT NULL DEFAULT 1,
-
-    AccountID INT NOT NULL,
-
-    FOREIGN KEY(MembershipLevel) REFERENCES MembershipLevel(MembershipLevel),
-    FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-);
-
 CREATE TABLE AccessLevel (
     AccessID INTEGER PRIMARY KEY,
     Name VARCHAR(10) NOT NULL,
     Description VARCHAR(64)
 );
+
+INSERT INTO AccessLevel (Name, Description) VALUES ('standard', 'Standard users of the website with no further access rights');
+INSERT INTO AccessLevel (Name, Description) VALUES ('mod', 'Have extended access rights but cannot create Newsletters or directly manipulate the database');
+INSERT INTO AccessLevel (Name, Description) VALUES ('admin', 'Has full access rights')
 
 CREATE TABLE LoreDocument (
     DocumentID INTEGER PRIMARY KEY,
@@ -95,6 +89,6 @@ CREATE TABLE WebsiteRating (
     RatingID INTEGER PRIMARY KEY,
     Rating INT NOT NULL CHECK(rating<=5),
 
-    AccountID INT NOT NULL,
+    AccountID INT NOT NULL UNIQUE,
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
 );
