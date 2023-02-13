@@ -6,6 +6,7 @@ import sqlite3
 import markdown
 
 from .decorators import *
+from .config import Config as config
 
 bp = Blueprint('documents', __name__)
 
@@ -20,7 +21,7 @@ def my_documents():
     Lists all of the users documents
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM LoreDocument WHERE AccountID=?', (session['userid'],))
     documents = cursor.fetchall()
 
@@ -46,7 +47,7 @@ def document_view(document_id):
     Provides the user with a view of all of the pages stored within a document
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
 
@@ -76,7 +77,7 @@ def add_document():
     Used when a user decides to create a new document
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
 
@@ -108,7 +109,7 @@ def edit_document(document_id):
     '''
     Used when a user decides to edit a document they own
     '''
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
 
     cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
@@ -130,8 +131,6 @@ def edit_document(document_id):
         db_conn.commit()
         db_conn.close()
 
-        print('done')
-
         return redirect(url_for('documents.my_documents'))
 
 @bp.route('/document/delete/<document_id>/', methods=['GET'])
@@ -141,7 +140,7 @@ def delete_document(document_id):
     Used to delete a document and its associated pages
     '''
     
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
     doc_account_id = cursor.fetchone()[0]
 
@@ -161,7 +160,7 @@ def delete_document(document_id):
 @check_loggedin
 def private_document(document_id):
     if session['access'] == 2 or session['access'] == 3:
-        db_conn = sqlite3.connect('./db/prototype.db')
+        db_conn = sqlite3.connect(config.db_dir)
         db_conn.execute('UPDATE LoreDocument SET Public=0 WHERE DocumentID=?', (document_id,))
         db_conn.commit()
         db_conn.close()
@@ -180,7 +179,7 @@ def page_view(page_id):
     a publically shared document
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
     res = cursor.fetchone()
 
@@ -210,7 +209,7 @@ def add_page(document_id):
     Used when a user decides to add a page to one of their documents
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
 
@@ -239,7 +238,7 @@ def edit_page(page_id):
     Allows the user to edit the content of a page within one of their own documents
     '''
     
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     # need to add document id here
     cursor = db_conn.execute('SELECT LoreDocument.AccountID, LorePage.DocumentID, LorePage.Name, LorePage.Content FROM LorePage INNER JOIN LoreDocument ON LorePage.DocumentID=LoreDocument.DocumentID WHERE PageID=? ', (page_id,))
     account_id, document_id, page_title, page_content = cursor.fetchone()
@@ -268,7 +267,7 @@ def delete_page(page_id):
     Used to delete a document and its associated pages
     '''
     
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, DocumentID FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
     page_account_id, document_id = cursor.fetchone()
 

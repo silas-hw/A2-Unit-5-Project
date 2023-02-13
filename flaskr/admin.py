@@ -3,6 +3,7 @@ import sqlite3
 import hashlib
 
 from .decorators import *
+from .config import Config as config
 
 bp = Blueprint('admin', __name__)
 
