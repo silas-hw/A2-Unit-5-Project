@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 import sqlite3
 
 from .decorators import *
+from .config import Config as config
 
 bp = Blueprint('main', __name__)
 
@@ -13,7 +14,7 @@ def home():
     '''
     returns the homepage to users who are not logged in and redirects logged in users to their dashboard
     '''
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
     ratings_temp=cursor.fetchall()
     ratings=[]
@@ -34,7 +35,7 @@ def dashboard():
     returns the dashboard to users who are logged in and redirects not logged in users to the homepage
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM LoreDocument WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
     res = cursor.fetchall()
     recent_docs=[]

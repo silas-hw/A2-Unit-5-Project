@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 import sqlite3
 
 from .decorators import *
+from .config import Config as config
 
 bp = Blueprint('users', __name__)
 
@@ -12,7 +13,7 @@ def account(account_id):
     Displays information relating to an account of a given account id
     '''
 
-    db_conn = sqlite3.connect('./db/prototype.db')
+    db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id))
     res = cursor.fetchone()
     
