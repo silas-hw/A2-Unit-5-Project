@@ -11,15 +11,13 @@ from .config import Config as config
 bp = Blueprint('auth', __name__)
 
 @bp.route('/login/', methods=['GET', 'POST'])
+@check_loggedout
 def login():
     '''
     Used for a user to 'log in' to an account they have already created using their
     email and password.
     '''
-
-    if 'loggedin' in session:
-        return redirect(url_for('main.home'))
-
+    
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 
         # assign the data provided in the form to variables
