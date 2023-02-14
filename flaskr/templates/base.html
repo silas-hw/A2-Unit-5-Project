@@ -3,15 +3,28 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
     <title> {% block title %}{% endblock %}</title>
     {% block head %} 
     {% endblock %}
+
+    {% if session['largefont'] %} 
+    <style>
+        body {
+            font-size: 1.2em;
+        }
+    </style>
+    {% endif %}
+
 </head>
 <body>
     <div class="navbar">
         <a href="{{ url_for('main.home') }}"><img style="object-fit: scale-down; height:90%; margin-left:15px;" src="{{ url_for('static', filename='img/logo.png') }}"></a>
         {% if 'loggedin' in session %}
+
+        <a href="{{ url_for('main.changefont') }}">a|A</a>
+
         <div class="navbar-account">
             <div class="navbar-link-container">
                 <a href="{{ url_for('users.account', account_id=session['userid']) }}">Account</a>

@@ -51,3 +51,14 @@ def dashboard():
         })
 
     return render_template('dashboard.html', session=session, recent_docs=recent_docs)
+
+@bp.route('/changefont/')
+@check_loggedin
+def changefont():
+    '''
+    Increases or decreases the font size of every element depending
+    on the users current preference.
+    '''
+    session['largefont'] = not session['largefont']
+    return redirect(url_for('main.dashboard'))
+

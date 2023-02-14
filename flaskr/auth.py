@@ -40,6 +40,7 @@ def login():
             session['username'] = username
             session['email'] = email
             session['access'] = access_level
+            session['largefont'] = False
 
             return redirect(url_for('main.home'))
         else:
@@ -61,6 +62,8 @@ def logout():
     session.pop('userid')
     session.pop('username')
     session.pop('email')
+    session.pop('access')
+    session.pop('largefont')
     
     return redirect(url_for('main.home'))
 
@@ -114,5 +117,6 @@ def register():
         session['userid'] = userid
         session['username'] = username
         session['email'] = email
+        session['largefont'] = False
 
         return redirect(url_for('main.home'))
