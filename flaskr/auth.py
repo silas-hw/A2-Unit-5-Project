@@ -17,10 +17,10 @@ def login():
     Used for a user to 'log in' to an account they have already created using their
     email and password.
     '''
-    
+
     if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 
-        # assign the data provided in the form to variables
+        # assign the data provided in the post request to variables
         email = request.form['email']
         password = request.form['password']
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest() # instantly hash/encrypt the password with sha256 to hexadecimal
@@ -32,6 +32,8 @@ def login():
         db_conn.close()
 
         # if the entered details were correct, create a session and redirect the user to the home page
+        # 'if res' will return True if res contains any data, which will only be true itself if
+        # the username and password combination entered by the user is correct
         if res:
             account_id, username, access_level = res
             session['loggedin'] = True
@@ -44,7 +46,7 @@ def login():
             return redirect(url_for('main.home'))
         else:
             # reload the login page but with an error message
-            # err_msg will be inserted into the login.html template by jinja
+            # err_msg will be inserted into the login.html template by jinja2
             return render_template('login.html', err_msg='Incorrect Username or Password')
 
     return render_template('login.html', err_msg='')
@@ -71,16 +73,18 @@ def register():
     
     if request.method == 'GET':
         return render_template('register.html', err_msg='')
+
     elif request.method == 'POST':
+        # if required data hasn't been entered return an error message to the user
         if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
             return render_template('register.html', err_msg='Please enter all data')
 
-        # assign entered details to variables
+        # assign variables to the data provided in the post request
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
 
-        # forms can only send string data, so here we convert it to an integer
+        # forms can only send string data, so here the newsletter field is converted into an integer boolean
         # Whilst we could technically just cast it using the int method, this way
         # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
         newsletter = 1 if "newsletter" in request.form else 0 
@@ -92,7 +96,7 @@ def register():
         cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
         res = cursor.fetchone()
         
-        # if the account already exists reload the register page but with an error message
+        # if the account already exists, reload the register page but with an error message
         if res:
             return render_template('register.html', err_msg='Username and/or Email already in use')
         

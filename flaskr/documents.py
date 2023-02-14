@@ -22,19 +22,21 @@ def my_documents():
     Lists all of the users documents
     '''
 
+    # create an sqlite connection and retrieve a list of the currently logged in users documents
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM LoreDocument WHERE AccountID=?', (session['userid'],))
     documents = cursor.fetchall()
 
+    # count how many documents the user has created
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
     db_conn.close()
 
+    # filter the document list if a search query has been provided
     search_query = request.args.get('q')
     if search_query:
         temp_docs = []
         for i, doc in enumerate(documents):
-            print(doc[0], search_query in doc[0])
             if search_query in doc[0]:
                 temp_docs.append(doc)
         documents=temp_docs
@@ -48,6 +50,7 @@ def document_view(document_id):
     Provides the user with a view of all of the pages stored within a document
     '''
 
+    #create an sqlite connection and retrieve the details of the document provided
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
@@ -78,14 +81,20 @@ def add_document():
     Used when a user decides to create a new document
     '''
 
+    # Check if the user has reached their document creation limit #
+
+    # create an sqlite connection and retrieve a count of how many documents the user has created
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
 
+    # retrieve the document limit of the users current membership level
     cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel FROM Membership WHERE AccountID=?)', (session['userid'],))
     doc_limit = cursor.fetchone()[0]
 
+    # if doc_limit is less than 1, then it means that the users membership level has unlimited documents
     if doc_limit>0:
+        # redirect the user to the my documents page if they have surpassed their document limit
         if num_docs == doc_limit:
             db_conn.close()
             return redirect(url_for('documents.my_documents'))
@@ -93,7 +102,9 @@ def add_document():
     if request.method=='GET':
         db_conn.close()
         return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
+    
     elif request.method=='POST':
+        # insert the data provided in the post request into the document table
         document_name = request.form['title']
         document_description = request.form['description']
         document_public = 1 if 'public' in request.form else 0
