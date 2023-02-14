@@ -58,12 +58,7 @@ def logout():
     '''
 
     # remove all the user details from the current session if they are already loggedin (i.e. 'log them out')
-    session.pop('loggedin')
-    session.pop('userid')
-    session.pop('username')
-    session.pop('email')
-    session.pop('access')
-    session.pop('largefont')
+    [session.pop(key) for key in list(session.keys())]
     
     return redirect(url_for('main.home'))
 
