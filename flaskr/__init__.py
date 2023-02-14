@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import os
 
+# local imports
 from .auth import bp as auth_bp
 from .main import bp as main_bp
 from .users import bp as users_bp
