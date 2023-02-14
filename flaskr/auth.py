@@ -47,9 +47,9 @@ def login():
         else:
             # reload the login page but with an error message
             # err_msg will be inserted into the login.html template by jinja2
-            return render_template('login.html', err_msg='Incorrect Username or Password')
+            return render_template('/auth/login.html', err_msg='Incorrect Username or Password')
 
-    return render_template('login.html', err_msg='')
+    return render_template('/auth/login.html', err_msg='')
 
 @bp.route('/logout/', methods=['GET'])
 @check_loggedin
@@ -72,12 +72,12 @@ def register():
     '''
     
     if request.method == 'GET':
-        return render_template('register.html', err_msg='')
+        return render_template('/auth/register.html', err_msg='')
 
     elif request.method == 'POST':
         # if required data hasn't been entered return an error message to the user
         if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
-            return render_template('register.html', err_msg='Please enter all data')
+            return render_template('/auth/register.html', err_msg='Please enter all data')
 
         # assign variables to the data provided in the post request
         username = request.form['username']
@@ -98,7 +98,7 @@ def register():
         
         # if the account already exists, reload the register page but with an error message
         if res:
-            return render_template('register.html', err_msg='Username and/or Email already in use')
+            return render_template('/auth/register.html', err_msg='Username and/or Email already in use')
         
         # insert the new account information into the User table within the database
         db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))

@@ -12,5 +12,11 @@ bp = Blueprint('admin', __name__)
 @check_loggedin
 @check_admin
 def admin_portal():
-    return render_template('admin_portal.html', session=session)
+    return render_template('/admin/admin_portal.html', session=session)
+
+@bp.route('/admin/database/')
+@check_loggedin
+@check_admin
+def database_view():
+    return render_template('/admin/database_view.html', session=session)
 
