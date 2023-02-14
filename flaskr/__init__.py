@@ -16,7 +16,7 @@ def create_app(test_config=None):
 
     app = Flask(__name__)
 
-    app.secret_key = 'secretekeygoeshere'
+    app.secret_key = 'secretekey'
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
