@@ -37,7 +37,7 @@ def dashboard():
     '''
 
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM LoreDocument WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
+    cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM Document WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
     res = cursor.fetchall()
     recent_docs=[]
     for doc in res:

@@ -24,11 +24,11 @@ def my_documents():
 
     # create an sqlite connection and retrieve a list of the currently logged in users documents
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM LoreDocument WHERE AccountID=?', (session['userid'],))
+    cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM Document WHERE AccountID=?', (session['userid'],))
     documents = cursor.fetchall()
 
     # count how many documents the user has created
-    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
+    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM Document WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
     db_conn.close()
 
@@ -52,7 +52,7 @@ def document_view(document_id):
 
     #create an sqlite connection and retrieve the details of the document provided
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
 
     # if the document doesn't exist, return user to dashboard
@@ -67,7 +67,7 @@ def document_view(document_id):
         db_conn.close()
         return 'the document you attempted to view is private'
 
-    cursor = db_conn.execute('SELECT PageID, Name FROM LorePage WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
 
     db_conn.close()
@@ -85,11 +85,11 @@ def add_document():
 
     # create an sqlite connection and retrieve a count of how many documents the user has created
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM LoreDocument WHERE AccountID=?', (session['userid'], ))
+    cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM Document WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
 
     # retrieve the document limit of the users current membership level
-    cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel FROM Membership WHERE AccountID=?)', (session['userid'],))
+    cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel FROM User WHERE AccountID=?)', (session['userid'],))
     doc_limit = cursor.fetchone()[0]
 
     # if doc_limit is less than 1, then it means that the users membership level has unlimited documents
@@ -109,7 +109,7 @@ def add_document():
         document_description = request.form['description']
         document_public = 1 if 'public' in request.form else 0
 
-        cursor = db_conn.execute('INSERT INTO LoreDocument (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
+        cursor = db_conn.execute('INSERT INTO Document (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
         db_conn.commit()
         db_conn.close()
 
@@ -123,7 +123,7 @@ def edit_document(document_id):
     '''
     db_conn = sqlite3.connect(config.db_dir)
 
-    cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
 
     if session['userid'] != account_id:
@@ -131,7 +131,7 @@ def edit_document(document_id):
         return redirect(url_for('main.dashboard'))
 
     if request.method=='GET':
-        cursor = db_conn.execute('SELECT DocumentName, Description FROM LoreDocument WHERE DocumentID=?', (document_id,))
+        cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
         title, description = cursor.fetchone()
         return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
     elif request.method=='POST':
@@ -139,7 +139,7 @@ def edit_document(document_id):
         document_description = request.form['description']
         document_public = 1 if 'public' in request.form else 0
 
-        cursor = db_conn.execute('UPDATE LoreDocument SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
+        cursor = db_conn.execute('UPDATE Document SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
         db_conn.commit()
         db_conn.close()
 
@@ -153,16 +153,16 @@ def delete_document(document_id):
     '''
     
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     doc_account_id = cursor.fetchone()[0]
 
     if session['userid'] != doc_account_id:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
-    cursor = db_conn.execute('DELETE FROM LorePage WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('DELETE FROM Page WHERE DocumentID=?', (document_id,))
     db_conn.commit()
-    cursor = db_conn.execute('DELETE FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('DELETE FROM Document WHERE DocumentID=?', (document_id,))
     db_conn.commit()
     db_conn.close()
 
@@ -173,7 +173,7 @@ def delete_document(document_id):
 def private_document(document_id):
     if session['access'] == 2 or session['access'] == 3:
         db_conn = sqlite3.connect(config.db_dir)
-        db_conn.execute('UPDATE LoreDocument SET Public=0 WHERE DocumentID=?', (document_id,))
+        db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
         db_conn.commit()
         db_conn.close()
 
@@ -192,7 +192,7 @@ def page_view(page_id):
     '''
 
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID, public FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
+    cursor = db_conn.execute('SELECT AccountID, public FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     res = cursor.fetchone()
 
     if not res:
@@ -206,7 +206,7 @@ def page_view(page_id):
         db_conn.close()
         return 'the document you attempted to view is private'
 
-    cursor = db_conn.execute('SELECT content FROM LorePage WHERE PageID=?', (page_id,))
+    cursor = db_conn.execute('SELECT content FROM Page WHERE PageID=?', (page_id,))
     md_content = cursor.fetchone()[0]
     db_conn.close()
     
@@ -222,7 +222,7 @@ def add_page(document_id):
     '''
 
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID FROM LoreDocument WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
 
     if 'userid' not in session or session['userid']!=account_id:
@@ -237,7 +237,7 @@ def add_page(document_id):
         title = request.form['title']
         content = request.form['content']
 
-        cursor = db_conn.execute('INSERT INTO LorePage (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
+        cursor = db_conn.execute('INSERT INTO Page (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
         db_conn.commit()
         db_conn.close()
 
@@ -252,7 +252,7 @@ def edit_page(page_id):
     
     db_conn = sqlite3.connect(config.db_dir)
     # need to add document id here
-    cursor = db_conn.execute('SELECT LoreDocument.AccountID, LorePage.DocumentID, LorePage.Name, LorePage.Content FROM LorePage INNER JOIN LoreDocument ON LorePage.DocumentID=LoreDocument.DocumentID WHERE PageID=? ', (page_id,))
+    cursor = db_conn.execute('SELECT Document.AccountID, Page.DocumentID, Page.Name, Page.Content FROM Page INNER JOIN Document ON Page.DocumentID=Document.DocumentID WHERE PageID=? ', (page_id,))
     account_id, document_id, page_title, page_content = cursor.fetchone()
 
     if session['userid']!=account_id:
@@ -266,7 +266,7 @@ def edit_page(page_id):
         title = request.form['title']
         content = request.form['content']
 
-        cursor = db_conn.execute('UPDATE LorePage SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
+        cursor = db_conn.execute('UPDATE Page SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
         db_conn.commit()
         db_conn.close()
         
@@ -280,14 +280,14 @@ def delete_page(page_id):
     '''
     
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID, DocumentID FROM LoreDocument WHERE DocumentID=(SELECT DocumentID FROM LorePage WHERE PageID=?)', (page_id,))
+    cursor = db_conn.execute('SELECT AccountID, DocumentID FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     page_account_id, document_id = cursor.fetchone()
 
     if session['userid'] != page_account_id:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
-    cursor = db_conn.execute('DELETE FROM LorePage WHERE PageID=?', (page_id,))
+    cursor = db_conn.execute('DELETE FROM Page WHERE PageID=?', (page_id,))
     db_conn.commit()
     db_conn.close()
 
