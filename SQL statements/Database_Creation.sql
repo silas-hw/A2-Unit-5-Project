@@ -30,8 +30,11 @@ CREATE TABLE MembershipLevel (
     Price INT NOT NULL CHECK(Price>=0)
 );
 
-INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('standard', 'The standard free account you can get just by signing up', 15, 50, 0);
-INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES ('premium', 'The paid membership that gives you unlimited documents and pages', -1, -1, 10);
+INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES 
+('standard', 'The standard free account you can get just by signing up', 15, 50, 0);
+
+INSERT INTO MembershipLevel (Name, Description, DocumentLimit, PageLimit, Price) VALUES 
+('premium', 'The paid membership that gives you unlimited documents and pages', -1, -1, 10);
 
 CREATE TABLE MembershipPayment (
     AccountID INT NOT NULL UNIQUE,
@@ -39,7 +42,7 @@ CREATE TABLE MembershipPayment (
     LastPaymentEpoch INT NOT NULL CHECK(LastPaymentEpoch>=DateStartedEpoch),
 
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-)
+);
 
 CREATE TABLE AccessLevel (
     AccessID INTEGER PRIMARY KEY,
@@ -47,9 +50,13 @@ CREATE TABLE AccessLevel (
     Description VARCHAR(64)
 );
 
-INSERT INTO AccessLevel (Name, Description) VALUES ('standard', 'Standard users of the website with no further access rights');
-INSERT INTO AccessLevel (Name, Description) VALUES ('mod', 'Have extended access rights but cannot create Newsletters or directly manipulate the database');
-INSERT INTO AccessLevel (Name, Description) VALUES ('admin', 'Has full access rights')
+INSERT INTO AccessLevel (Name, Description) VALUES 
+('standard', 'Standard users of the website with no further access rights');
+
+INSERT INTO AccessLevel (Name, Description) VALUES 
+('mod', 'Have extended access rights but cannot create Newsletters directly manipulate the database');
+
+INSERT INTO AccessLevel (Name, Description) VALUES ('admin', 'Has full access rights');
 
 ---Document Tables
 CREATE TABLE Document (
@@ -71,7 +78,7 @@ CREATE TABLE DocumentShare (
 
     FOREIGN KEY(AccountID) REFERENCES User(AccountID),
     FOREIGN KEY(DocumentID) REFERENCES Document(DocumentID)
-)
+);
 
 CREATE TABLE Page (
     PageID INTEGER PRIMARY KEY,
@@ -93,10 +100,10 @@ CREATE TABLE DocumentComment (
 );
 
 CREATE TABLE DocumentLike (
-    LikeID INTEGER PRIMARY KEY,
-    
     DocumentID INT NOT NULL,
     AccountID INT NOT NULL,
+
+    CONSTRAINT unq UNIQUE (DocumentID, AccountID),
 
     FOREIGN KEY(DocumentID) REFERENCES Document(DocumentID),
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
@@ -111,7 +118,7 @@ CREATE TABLE Comment (
     DateEpoch INT NOT NULL,
 
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-)
+);
 
 ---Community Posts
 CREATE TABLE CommunityPost (
@@ -124,7 +131,7 @@ CREATE TABLE CommunityPost (
     DateEpoch INT NOT NULL,
 
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-)
+);
 
 CREATE TABLE CommunityPostComment (
     CommentID INT NOT NULL,
@@ -132,16 +139,17 @@ CREATE TABLE CommunityPostComment (
 
     FOREIGN KEY(PostID) REFERENCES CommunityPost(PostID),
     FOREIGN KEY(CommentID) REFERENCES Comment(CommentID)
-)
+);
 
 CREATE TABLE CommunityPostLike (
-    LikeID INTEGER PRIMARY KEY,
     PostID INT NOT NULL,
     AccountID INT NOT NULL,
 
+    CONSTRAINT unq UNIQUE (PostID, AccountID),
+
     FOREIGN KEY(PostID) REFERENCES CommunityPost(PostID),
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-)
+);
 
 ---Website Rating Table
 CREATE TABLE WebsiteRating (
@@ -163,4 +171,4 @@ CREATE TABLE Newsletter (
     DateSendEpoch INT NOT NULL,
 
     FOREIGN KEY(AccountID) REFERENCES User(AccountID)
-)
+);
