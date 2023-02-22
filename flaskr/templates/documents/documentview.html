@@ -3,6 +3,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+<script src="{{ url_for('static', filename='js/document.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -13,8 +14,6 @@
         <button class="edit-document" onclick="window.location.href='{{ url_for('documents.edit_document', document_id=document_id) }}'">Edit</button>
         <button class="add-page" onclick="window.location.href='{{ url_for('documents.add_page', document_id=document_id) }}'">Add page</button>
         <button class="delete-document" onclick="window.location.href='{{ url_for('documents.delete_document', document_id=document_id) }}'">Delete</button>
-    
-    
     {% endif %} 
 
     {% if session['access']==2 or session['access']==3 %} 
@@ -29,4 +28,22 @@
         <a class="page-link" href="{{ url_for('documents.page_view', page_id=page[0]) }}">{{ page[1] }}</a>
     {% endfor %}
 </div> 
+
+<div class="document-community">
+    <button type="button" onclick="like_document({{ document_id }})">Like</button>
+    <p id="likes">{{ num_likes }}</p>
+
+    <form class="comment-form" id="comment" action="{{ url_for('documents.comment_document', document_id=document_id) }}", method="POST">
+        <input type="text" id="content" name="content"></input>
+        <button type="submit">comment</button>
+    </form>
+
+    <div id = "comments">
+
+    </div>
+</div>
+
+<script>
+    get_comments({{ document_id }}, 0)
+</script>
 {% endblock %} 

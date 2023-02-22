@@ -1,9 +1,9 @@
 # Note: for an understanding of how the terms 'document' and 'page' relate to each other in this context refer to the design document
 
-from tabnanny import check
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 import markdown
+import time
 
 # local imports
 from .decorators import *
@@ -70,9 +70,12 @@ def document_view(document_id):
     cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
 
+    cursor = db_conn.execute('SELECT COUNT(AccountID) FROM DocumentLike WHERE DocumentID=?', (document_id,))
+    num_likes = cursor.fetchone()[0]
+
     db_conn.close()
 
-    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, session=session)
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, num_likes=num_likes, session=session)
 
 @bp.route('/document/add/', methods=['GET', 'POST'])
 @check_loggedin
@@ -288,6 +291,96 @@ def delete_page(page_id):
         return redirect(url_for('main.dashboard'))
 
     cursor = db_conn.execute('DELETE FROM Page WHERE PageID=?', (page_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('documents.document_view', document_id=document_id))
+
+#########################
+# COMMENTING AND LIKING #
+#########################
+
+@bp.route('/<type>/commentlist', methods=['POST'])
+@check_loggedin
+def comment_list(type):
+
+    request_data = request.get_json()
+
+    db_conn = sqlite3.connect(config.db_dir)
+    offset = int(request_data['offset'])*config.num_comments
+
+    if type=='document':
+        document_id = request_data['document_id']
+        cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.num_comments, offset))
+    else:
+        post_id = request_data['post_id']
+        cursor = execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
+
+    comment_ids=[id[0] for id in cursor.fetchall()]
+
+    statement_tuple = '?,'*len(comment_ids)
+    statement_tuple = statement_tuple[:len(statement_tuple)-1]
+    statement = f'SELECT * FROM Comment WHERE CommentID IN ({statement_tuple})'
+
+    cursor = db_conn.execute(statement, comment_ids)
+    comments = cursor.fetchall()
+
+    comment_list = []
+    for comment in comments:
+        comment_id, account_id, content, dateepoch = comment
+
+        cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (account_id,))
+        username = cursor.fetchone()[0]
+        
+        date = time.strftime('%d/%m/%Y', time.localtime(dateepoch))
+
+        comment_list.append((account_id, username, content, date))
+
+    return render_template('/documents/commentlist.html', comments=comment_list)
+
+@bp.route('/document/like/<document_id>/', methods=['POST'])
+@check_loggedin
+def like_document(document_id):
+    '''
+    Likes or un-likes documents
+    '''
+
+    db_conn = sqlite3.connect(config.db_dir)
+    cursor = db_conn.execute('SElECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
+    res = cursor.fetchone()
+
+    if res:
+        cursor = db_conn.execute('DELETE FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
+    else:
+        cursor = db_conn.execute('INSERT INTO DocumentLike (AccountID, DocumentID) VALUES (?, ?)', (session['userid'], document_id))
+
+    db_conn.commit()
+
+    cursor = db_conn.execute('SELECT COUNT(AccountID) FROM DocumentLike WHERE DocumentID=?', (document_id,))
+    num_likes = cursor.fetchone()[0]
+
+    db_conn.close()
+
+    return str(num_likes), 202
+
+@bp.route('/document/comment/<document_id>/', methods=['POST'])
+@check_loggedin
+def comment_document(document_id):
+    '''
+    Adds a comment to a document
+    '''
+
+    content = request.form['content']
+    dateepoch = int(time.time())
+    
+    db_conn = sqlite3.connect(config.db_dir)
+    cursor = db_conn.execute('INSERT INTO Comment (AccountID, Content, DateEpoch) VALUES (?, ?, ?)', (session['userid'], content, dateepoch))
+    db_conn.commit()
+
+    cursor = db_conn.execute('SELECT CommentID FROM Comment WHERE AccountID=? AND Content=? AND DateEpoch=?', (session['userid'], content, dateepoch))
+    comment_id = cursor.fetchone()[0]
+
+    cursor = db_conn.execute('INSERT INTO DocumentComment (CommentID, DocumentID) VALUES (?, ?)', (comment_id, document_id))
     db_conn.commit()
     db_conn.close()
 

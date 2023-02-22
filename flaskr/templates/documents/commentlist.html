@@ -1,0 +1,6 @@
+{% for comment in comments %} 
+    <div class="comment">
+        <h4>{{ comment[1] }}</h4>
+        <p>{{ comment[2] }} <i>{{ comment[3] }}</i></p>
+    </div>
+{% endfor %}
