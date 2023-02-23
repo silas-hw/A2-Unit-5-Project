@@ -91,3 +91,12 @@ button.add-page {
 div.doc-button-container {
     float: right
 }
+
+/*
+    Community
+*/
+
+div.document-community {
+    width: 70%;
+    margin: auto;
+}

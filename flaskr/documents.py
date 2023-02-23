@@ -320,7 +320,7 @@ def comment_list(type):
 
     statement_tuple = '?,'*len(comment_ids)
     statement_tuple = statement_tuple[:len(statement_tuple)-1]
-    statement = f'SELECT * FROM Comment WHERE CommentID IN ({statement_tuple})'
+    statement = f'SELECT * FROM Comment WHERE CommentID IN ({statement_tuple}) ORDER BY DateEpoch DESC'
 
     cursor = db_conn.execute(statement, comment_ids)
     comments = cursor.fetchall()
@@ -371,6 +371,9 @@ def comment_document(document_id):
     '''
 
     content = request.form['content']
+    print(len(content))
+    if len(content)==0:
+        redirect(url_for('documents.document_view', document_id=document_id)), 304
     dateepoch = int(time.time())
     
     db_conn = sqlite3.connect(config.db_dir)

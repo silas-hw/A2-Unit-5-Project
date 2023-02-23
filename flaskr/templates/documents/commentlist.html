@@ -1,6 +1,7 @@
 {% for comment in comments %} 
     <div class="comment">
-        <h4>{{ comment[1] }}</h4>
-        <p>{{ comment[2] }} <i>{{ comment[3] }}</i></p>
+        <h4 class="comment-author"><a href="{{ url_for('users.account', account_id=comment[0]) }}">{{ comment[1] }}</a></h4>
+        <span class="comment-date"><i><b>{{ comment[3] }}</b></i></span>
+        <p class="comment-content">{{ comment[2] }}</p>
     </div>
 {% endfor %}

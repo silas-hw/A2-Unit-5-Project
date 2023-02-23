@@ -355,3 +355,56 @@ p.error-msg {
     color: var(--error-color);
     font-size: 0.8em;
 }
+
+/*
+    Comments & Likes
+*/
+
+div.like-container {
+    float: right;
+    margin-right: 20px;
+}
+
+button.like-button {
+    display: inline;
+}
+
+p.like-count {
+    display: inline;
+    margin-left: 3px;
+}
+
+form.comment-form {
+    margin-left: 10px;
+}
+
+input.comment-form-content {
+    height: 2em;
+    border-style: solid;
+    border-color:rgb(32, 32, 32);
+    border-width: 1px;
+}
+
+div.comment {
+    background-color: var(--secondary-background-color);
+    padding: 3px;
+    padding-left: 30px;
+
+    border-radius: var(--main-border-radius);
+
+    margin: 10px;
+}
+span.comment-date {
+    font-size: 0.75em;
+    color:rgba(68, 68, 68, 0.705);
+    margin: 0px;
+}
+
+h4.comment-author{
+    margin-top: 5px;
+    margin-bottom: 0px;
+}
+
+p.comment-content {
+    margin-top: 5px;
+}

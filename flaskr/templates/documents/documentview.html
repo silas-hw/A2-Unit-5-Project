@@ -30,11 +30,14 @@
 </div> 
 
 <div class="document-community">
-    <button type="button" onclick="like_document({{ document_id }})">Like</button>
-    <p id="likes">{{ num_likes }}</p>
-
+    <h3>Community</h3>
+    <div class="like-container">
+        <button class="like-button" type="button" onclick="like_document({{ document_id }})">Like</button>
+        <p class="like-count" id="likes">{{ num_likes }}</p>
+    </div>
+    
     <form class="comment-form" id="comment" action="{{ url_for('documents.comment_document', document_id=document_id) }}", method="POST">
-        <input type="text" id="content" name="content"></input>
+        <input class="comment-form-content" type="text" id="content" name="content" required></input>
         <button type="submit">comment</button>
     </form>
 

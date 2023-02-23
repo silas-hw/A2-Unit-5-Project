@@ -18,11 +18,12 @@ def account(account_id):
     cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id))
     res = cursor.fetchone()
     
-    if len(res)==0:
+    if not res:
         db_conn.close()
         return redirect(url_for('main.home'))
     else:
-        cursor = db_conn.execute('SELECT Name FROM AccessLevel WHERE AccessID=?', (res[7],))
+        userid, username, password, email, newsletters, restricted, banknum, banksort, membership, access_level = res
+        cursor = db_conn.execute('SELECT Name FROM AccessLevel WHERE AccessID=?', (access_level,))
         access_level = cursor.fetchone()[0]
 
         db_conn.close()
