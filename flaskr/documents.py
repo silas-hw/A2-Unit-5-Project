@@ -338,7 +338,7 @@ def comment_list(type):
 
     return render_template('/documents/commentlist.html', comments=comment_list)
 
-@bp.route('/document/like/<document_id>/', methods=['POST'])
+@bp.route('/document/like/<document_id>', methods=['POST'])
 @check_loggedin
 def like_document(document_id):
     '''
@@ -371,7 +371,6 @@ def comment_document(document_id):
     '''
 
     content = request.form['content']
-    print(len(content))
     if len(content)==0:
         redirect(url_for('documents.document_view', document_id=document_id)), 304
     dateepoch = int(time.time())

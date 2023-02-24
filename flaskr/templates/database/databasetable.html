@@ -1,0 +1,26 @@
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<table class="database-table">
+    <tr>
+        {% for header in table_headers %}
+
+        <th>{{ header }}</th>
+
+        {% endfor %}
+    </tr>
+
+    {% for row in table_data %}
+
+    <tr class="database-row">
+        {% for data in row %} 
+
+        <td>{{ data }}</td>
+
+        {% endfor %}
+    </tr>
+
+    {% endfor %}
+</table>

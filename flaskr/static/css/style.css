@@ -408,3 +408,27 @@ h4.comment-author{
 p.comment-content {
     margin-top: 5px;
 }
+
+/*
+Database
+*/
+
+table, th, tr {
+    border: 1px solid black;
+}
+
+table.database-table {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-collapse: collapse;
+}
+
+tr.database-row:nth-child(even) {
+    background-color: var(--secondary-background-color);
+}
+
+th {
+    background-color: var(--primary-highlight-color);
+    color: white;
+
+    text-align: left;
+}

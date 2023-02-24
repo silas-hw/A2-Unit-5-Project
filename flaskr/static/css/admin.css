@@ -28,3 +28,19 @@ button.admin-button {
     
     display: inline
 }
+
+/*
+Database
+*/
+
+div.database-options {
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+div.database-container {
+    width:90%;
+    height: 80%;
+
+    overflow-x:scroll;
+}
