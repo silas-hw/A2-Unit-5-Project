@@ -68,4 +68,3 @@ def database_fieldnames():
     table_headers = [header[1] for header in table_headers]
 
     return jsonify(table_headers)
-
