@@ -92,3 +92,5 @@ def newsletters():
     cursor = db_conn.execute('SELECT * FROM Newsletter')
     newsletter_list = cursor.fetchall()
     db_conn.close()
+
+    return render_template('database/newsletters.html', session=session, newsletters=newsletter_list)
