@@ -7,4 +7,19 @@
 
 {% block content %} 
 
+<div class="newsletter-options">
+
+</div>
+
+<div class="newsletter-list">
+    {% for newsletter in newsletters %}  
+    
+    <div class="newsletter">
+        <h3>{{ newsletter[1] }}</h3>
+        <p>{{ newsletter[2][:64] </p>
+    </div>
+    
+    {% endfor %}
+</div>
+
 {% endblock %}
