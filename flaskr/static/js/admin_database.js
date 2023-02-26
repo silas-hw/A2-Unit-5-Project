@@ -31,11 +31,18 @@ function update_view() {
     var field_name_select = document.getElementById('field_name');
     var field_name = field_name_select.value;
 
+    var sort_name = document.getElementById('sort_name').value;
+    var sort_direction = document.getElementById('sort_opt').value;
+
     var search_query = document.getElementById('search_query').value
 
     var table_URL = window.location.protocol+'//'+window.location.host+'/backend/admin/database/?table='+table_name;
     if (field_name!='') {
         table_URL+='&field='+field_name+'&q='+search_query;
+    }
+
+    if (sort_name!='') {
+        table_URL+="&sort_field="+sort_name+"&sort_direction="+sort_direction
     }
     fetch (table_URL)
         .then((response) => response.text())
@@ -45,7 +52,9 @@ function update_view() {
 function update_fieldnames() {
     var table_name = document.getElementById('table_name').value;
     var field_name_select = document.getElementById('field_name');
+    var sort_name_select = document.getElementById('sort_name')
     var search_query = document.getElementById('search_query')
+    var res_data
 
     field_name_select.value = ''
     search_query.value = ''
@@ -53,7 +62,9 @@ function update_fieldnames() {
     var field_URL = window.location.protocol+'//'+window.location.host+'/backend/admin/database/fieldnames/?table='+table_name;
     fetch(field_URL) 
         .then((response) => response.json())
-        .then((data) => update_select_options(field_name_select, data))
+        .then((data) => res_data = data)
+        .then(() => update_select_options(field_name_select, res_data))
+        .then(() => update_select_options(sort_name_select, res_data))
 }
 
 function update_page() {

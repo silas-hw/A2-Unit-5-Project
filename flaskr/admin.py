@@ -34,12 +34,22 @@ def database_table():
     table = request.args.get('table')
     field = request.args.get('field')
     query = request.args.get('q')
+    sort_field = request.args.get('sort_field')
+    sort_direction = request.args.get('sort_direction')
 
     db_conn = sqlite3.connect(config.db_dir)
 
+    cursor = db_conn.execute(f'PRAGMA table_info({table})')
+    table_headers = cursor.fetchall()
+    table_headers = [header[1] for header in table_headers]
+
     statement = f'SELECT * FROM {table}'
-    if query:
+    if query and ';' not in query and ';' not in field:
         statement += f' WHERE {field}={query}'
+
+    if sort_field in table_headers and sort_direction in ('ASC', 'DESC'):
+        statement += f' ORDER BY {sort_field} {sort_direction}'
+
     print(statement, flush=True)
 
     try:
@@ -47,10 +57,6 @@ def database_table():
         table_data = cursor.fetchall()
     except sqlite3.OperationalError:
         table_data = []
-
-    cursor = db_conn.execute(f'PRAGMA table_info({table})')
-    table_headers = cursor.fetchall()
-    table_headers = [header[1] for header in table_headers]
 
     db_conn.close()
 

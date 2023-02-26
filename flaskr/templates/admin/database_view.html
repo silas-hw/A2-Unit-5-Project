@@ -9,21 +9,32 @@
 {% block content %} 
 
 <div class="database-options">
+    <label for="table_name">Table</label>
     <select name="table_name" id="table_name" onchange="update_page()">
         {% for table_name in database_tables %} 
         <option value="{{ table_name[0] }}">{{ table_name[0] }}</option>
         {% endfor %}
     </select>
 
+    <label for="field_name">Search Field</label>
     <select name="field_name" id="field_name" onchange="update_view()">
         <option value=''>-</option>
     </select>
 
-    <input type="text" id="search_query" onchange="update_view()"></input>
-</div>
-<div class="database-container" id="database_container">
+    <input type="text" id="search_query" onchange="update_view()" placeholder="search query..."></input>
 
+    <label for="sort_name">Sort</label>
+    <select name="sort_name" id="sort_name" onchange="update_view()">
+        <option value="">-</option>
+    </select>
+
+    <select name="sort_opt" id="sort_opt" onchange="update_view()">
+        <option value="ASC">Ascending</option>
+        <option value="DESC">Descending</option>
+    </select>
 </div>
+
+<div class="database-container" id="database_container"></div>
 
 <script>
     update_page()
