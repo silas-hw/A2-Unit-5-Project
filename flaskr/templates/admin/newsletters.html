@@ -7,7 +7,7 @@
 
 {% block content %} 
 
-<div class="newsletter-options">
+<div class="newsletters-options">
 
 </div>
 
@@ -15,10 +15,19 @@
     {% for newsletter in newsletters %}  
     
     <div class="newsletter">
-        <h3>{{ newsletter[1] }}</h3>
-        <p>{{ newsletter[2][:64] </p>
+        <div class="newsletter-content">
+            <h3>{{ newsletter[3] }}</h3>
+            <span><i>Created By: <a href="{{ url_for('users.account', account_id=newsletter[1]) }}">{{ newsletter[2] }}</a></i></span>
+            <span><i>Date Created: {{ newsletter[5] }}</i></span>
+            <p>{{ newsletter[4][:64] }}</p>
+        </div>
+        
+        <div class="newsletter-buttons">
+            <button class="edit-newsletter" onclick="window.location.href='{{ url_for('admin.edit_newsletter', newsletter_id=newsletter[0]) }}'">Edit</button>
+            <button class="delete-newsletter" onclick="window.location.href='{{ url_for('admin.delete_newsletter', newsletter_id=newsletter[0]) }}'">Delete</button>
+        </div>
     </div>
-    
+
     {% endfor %}
 </div>
 

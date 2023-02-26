@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app, jsonify
 import sqlite3
 import hashlib
+import time
+import datetime
 
 #local imports
 from .decorators import *
@@ -91,6 +93,53 @@ def newsletters():
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT * FROM Newsletter')
     newsletter_list = cursor.fetchall()
+
+    temp_arr = []
+    for newsletter in newsletter_list:
+        newsletter_id, account_id, subject, content, date_epoch = newsletter
+
+        cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (account_id,))
+        username = cursor.fetchone()[0]
+
+        date = time.strftime('%d/%m/%Y', time.localtime(date_epoch))
+
+        temp_arr.append((newsletter_id, account_id, username, subject, content, date))
+    newsletter_list=temp_arr
     db_conn.close()
 
-    return render_template('database/newsletters.html', session=session, newsletters=newsletter_list)
+    return render_template('admin/newsletters.html', session=session, newsletters=newsletter_list)
+
+@bp.route('/admin/newsletter/edit/<newsletter_id>', methods=['POST', 'GET'])
+@check_loggedin
+@check_admin
+def edit_newsletter(newsletter_id):
+
+    if request.method == 'GET':
+        db_conn = sqlite3.connect(config.db_dir)
+        cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+        newsletter = cursor.fetchone()
+
+        date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
+
+        db_conn.close()
+
+        return render_template('admin/newsletter_edit.html', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+
+    elif request.method == 'POST':
+        db_conn = sqlite3.connect(config.db_dir)
+        subject = request.form['subject']
+        content = request.form['content']
+        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+
+        cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
+        db_conn.commit()
+
+        db_conn.close()
+
+        return redirect(url_for('admin.newsletters'))
+
+@bp.route('/admin/newsletter/<newsletter_id>')
+@check_loggedin
+@check_admin
+def delete_newsletter(newsletter_id):
+    return 'Coming Soon', 404
