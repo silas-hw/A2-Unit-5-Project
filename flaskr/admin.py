@@ -76,6 +76,7 @@ def database_fieldnames():
     cursor = db_conn.execute(f'PRAGMA table_info({table})')
     table_headers = cursor.fetchall()
     table_headers = [header[1] for header in table_headers]
+    db_conn.close()
 
     return jsonify(table_headers)
 
