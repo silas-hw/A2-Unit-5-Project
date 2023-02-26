@@ -14,6 +14,10 @@ bp = Blueprint('admin', __name__)
 def admin_portal():
     return render_template('/admin/admin_portal.html', session=session)
 
+############
+# DATABASE #
+############
+
 @bp.route('/admin/database/')
 @check_loggedin
 @check_admin
@@ -74,3 +78,16 @@ def database_fieldnames():
     table_headers = [header[1] for header in table_headers]
 
     return jsonify(table_headers)
+
+###############
+# NEWSLETTERS #
+###############
+
+@bp.route('/admin/newsletters/')
+@check_loggedin
+@check_admin
+def newsletters():
+    db_conn = sqlite3.connect(config.db_dir)
+    cursor = db_conn.execute('SELECT * FROM Newsletter')
+    newsletter_list = cursor.fetchall()
+    db_conn.close()
