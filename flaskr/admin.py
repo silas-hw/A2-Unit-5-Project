@@ -40,6 +40,7 @@ def database_table():
     table = request.args.get('table')
     field = request.args.get('field')
     query = request.args.get('q')
+    search_type = request.args.get('search_type')
     sort_field = request.args.get('sort_field')
     sort_direction = request.args.get('sort_direction')
 
@@ -51,12 +52,11 @@ def database_table():
 
     statement = f'SELECT * FROM {table}'
     if query and ';' not in query and ';' not in field:
-        statement += f' WHERE {field}={query}'
+        search_type = config.search_type_reference[search_type]
+        statement += f' WHERE {field}{search_type}{query}'
 
     if sort_field in table_headers and sort_direction in ('ASC', 'DESC'):
         statement += f' ORDER BY {sort_field} {sort_direction}'
-
-    print(statement, flush=True)
 
     try:
         cursor = db_conn.execute(statement)

@@ -6,4 +6,14 @@ class Config:
     db_dir = './db/project.db'
     num_comments=20
     iso8601='%Y-%m-%d' # The ISO8601 datetime format
+
+    search_type_reference = {
+        'eq':'=',
+        'neq':'!=',
+        'g':'>',
+        'l':'<',
+        'geq':'>=',
+        'leq':'<=',
+        'LIKE':'LIKE'
+    }
     

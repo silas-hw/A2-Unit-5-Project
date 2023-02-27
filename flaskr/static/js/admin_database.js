@@ -34,11 +34,12 @@ function update_view() {
     var sort_name = document.getElementById('sort_name').value;
     var sort_direction = document.getElementById('sort_opt').value;
 
-    var search_query = document.getElementById('search_query').value
+    var search_query = document.getElementById('search_query').value;
+    var search_type = document.getElementById('search_type').value;
 
     var table_URL = window.location.protocol+'//'+window.location.host+'/backend/admin/database/?table='+table_name;
     if (field_name!='') {
-        table_URL+='&field='+field_name+'&q='+search_query;
+        table_URL+='&field='+field_name+'&q='+search_query+'&search_type='+search_type;
     }
 
     if (sort_name!='') {
