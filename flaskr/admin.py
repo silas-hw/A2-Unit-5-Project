@@ -14,7 +14,12 @@ bp = Blueprint('admin', __name__)
 @check_loggedin
 @check_admin
 def admin_portal():
-    return render_template('/admin/admin_portal.html', session=session)
+    db_conn = sqlite3.connect(config.db_dir)
+    cursor = db_conn.execute('SElECT COUNT(AccountID) FROM User')
+    num_users = cursor.fetchone()[0]
+    db_conn.close()
+
+    return render_template('/admin/admin_portal.html', session=session, num_users=num_users)
 
 ############
 # DATABASE #

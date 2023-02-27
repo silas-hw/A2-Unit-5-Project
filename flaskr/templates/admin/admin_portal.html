@@ -6,8 +6,9 @@
 {% endblock %}
 
 {% block content %} 
+<h1>Welcome, {{ num_users }} people have created an account with us!</h1>
 <div class="buttons-container">
-    <button class="admin-button">Newsletters</button>
-    <button class="admin-button">View Database</button>
+    <button class="admin-button" onclick="window.location.href='{{ url_for('admin.newsletters') }}'">Newsletters</button>
+    <button class="admin-button" onclick="window.location.href='{{ url_for('admin.database_view') }}'">View Database</button>
 </div>
 {% endblock %}

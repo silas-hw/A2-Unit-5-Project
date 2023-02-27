@@ -5,8 +5,10 @@ Admin Portal
 div.buttons-container {
     width: 100%;
     height: 100%;
-    padding-top: 100px;
+    padding-top: 30px;
     text-align: center;
+
+    margin-top: 0px;
 }
 
 /* Newsletter Edit */
