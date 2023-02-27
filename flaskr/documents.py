@@ -173,14 +173,21 @@ def delete_document(document_id):
 
 @bp.route('/admin/privatedoc/<document_id>/', methods=['GET'])
 @check_loggedin
+@check_moderator
 def private_document(document_id):
-    if session['access'] >=2:
-        db_conn = sqlite3.connect(config.db_dir)
-        db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
-        db_conn.commit()
-        db_conn.close()
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
 
-        return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.dashboard'))
+
+@bp.route('/admin/document/restrict/<document_id>')
+@check_loggedin
+@check_moderator
+def restrict_document(document_id):
+
+    return "this doesn't exist yet", 404
 
 #############
 # PAGES     #
