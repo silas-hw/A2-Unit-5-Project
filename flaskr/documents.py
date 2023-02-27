@@ -52,7 +52,7 @@ def document_view(document_id):
 
     #create an sqlite connection and retrieve the details of the document provided
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description, Restricted FROM Document WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
 
     # if the document doesn't exist, return user to dashboard
@@ -60,12 +60,12 @@ def document_view(document_id):
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
-    account_id, public, title, description = res
+    account_id, public, title, description, restricted = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
-    if public==False and not document_owner:
+    if (public==False or restricted) and not document_owner and session['access']==1:
         db_conn.close()
-        return 'the document you attempted to view is private'
+        return 'the document you attempted to view is private or restricted by a moderator'
 
     cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
@@ -75,7 +75,7 @@ def document_view(document_id):
 
     db_conn.close()
 
-    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, num_likes=num_likes, session=session)
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, num_likes=num_likes, session=session, restricted=restricted)
 
 @bp.route('/document/add/', methods=['GET', 'POST'])
 @check_loggedin
@@ -187,7 +187,24 @@ def private_document(document_id):
 @check_moderator
 def restrict_document(document_id):
 
-    return "this doesn't exist yet", 404
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Restricted=1 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('main.dashboard'))
+
+@bp.route('/admin/document/unrestrict/<document_id>')
+@check_loggedin
+@check_moderator
+def unrestrict_document(document_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Restricted=0 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('main.dashboard'))
 
 #############
 # PAGES     #
