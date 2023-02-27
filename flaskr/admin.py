@@ -96,7 +96,7 @@ def newsletters():
 
     temp_arr = []
     for newsletter in newsletter_list:
-        newsletter_id, account_id, subject, content, date_epoch = newsletter
+        newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
         cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (account_id,))
         username = cursor.fetchone()[0]
