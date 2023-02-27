@@ -52,7 +52,7 @@ def document_view(document_id):
 
     #create an sqlite connection and retrieve the details of the document provided
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
+    cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description, Restricted FROM Document WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
 
     # if the document doesn't exist, return user to dashboard
@@ -60,12 +60,12 @@ def document_view(document_id):
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
-    account_id, public, title, description = res
+    account_id, public, title, description, restricted = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
-    if public==False and not document_owner:
+    if (public==False or restricted) and not document_owner and session['access']==1:
         db_conn.close()
-        return 'the document you attempted to view is private'
+        return 'the document you attempted to view is private or restricted by a moderator'
 
     cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
@@ -75,7 +75,7 @@ def document_view(document_id):
 
     db_conn.close()
 
-    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, num_likes=num_likes, session=session)
+    return render_template('/documents/documentview.html', pages=pages, document_owner=document_owner, document_id=document_id, title=title, description=description, num_likes=num_likes, session=session, restricted=restricted)
 
 @bp.route('/document/add/', methods=['GET', 'POST'])
 @check_loggedin
@@ -173,14 +173,38 @@ def delete_document(document_id):
 
 @bp.route('/admin/privatedoc/<document_id>/', methods=['GET'])
 @check_loggedin
+@check_moderator
 def private_document(document_id):
-    if session['access'] == 2 or session['access'] == 3:
-        db_conn = sqlite3.connect(config.db_dir)
-        db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
-        db_conn.commit()
-        db_conn.close()
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
 
-        return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.dashboard'))
+
+@bp.route('/admin/document/restrict/<document_id>')
+@check_loggedin
+@check_moderator
+def restrict_document(document_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Restricted=1 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('main.dashboard'))
+
+@bp.route('/admin/document/unrestrict/<document_id>')
+@check_loggedin
+@check_moderator
+def unrestrict_document(document_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE Document SET Restricted=0 WHERE DocumentID=?', (document_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('main.dashboard'))
 
 #############
 # PAGES     #
@@ -314,7 +338,7 @@ def comment_list(type):
         cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.num_comments, offset))
     else:
         post_id = request_data['post_id']
-        cursor = execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
+        cursor = db_conn.execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
 
     comment_ids=[id[0] for id in cursor.fetchall()]
 
@@ -334,7 +358,7 @@ def comment_list(type):
         
         date = time.strftime('%d/%m/%Y', time.localtime(dateepoch))
 
-        comment_list.append((account_id, username, content, date))
+        comment_list.append((comment_id, account_id, username, content, date))
 
     return render_template('/documents/commentlist.html', comments=comment_list)
 
@@ -384,6 +408,30 @@ def comment_document(document_id):
 
     cursor = db_conn.execute('INSERT INTO DocumentComment (CommentID, DocumentID) VALUES (?, ?)', (comment_id, document_id))
     db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('documents.document_view', document_id=document_id))
+
+@bp.route('/document/comment/delete/<comment_id>/', methods=['GET'])
+@check_loggedin
+def delete_comment(comment_id):
+    db_conn = sqlite3.connect(config.db_dir)
+
+    cursor = db_conn.execute('SELECT DocumentID FROM DocumentComment WHERE CommentID=?', (comment_id,))
+    document_id = cursor.fetchone()[0]
+
+    if session['access']==1:
+        cursor = db_conn.execute('SELECT AccountID FROM Comment WHERE CommentID=?', (comment_id,))
+        owner_id = cursor.fetchone()[0]
+
+        if session['userid'] != owner_id:
+            return redirect(url_for('documents.document_view', document_id=document_id))
+    
+    db_conn.execute('DELETE FROM DocumentComment WHERE CommentID=?', (comment_id,))
+    db_conn.commit()
+    db_conn.execute('DELETE FROM Comment WHERE CommentID=?', (comment_id))
+    db_conn.commit()
+
     db_conn.close()
 
     return redirect(url_for('documents.document_view', document_id=document_id))

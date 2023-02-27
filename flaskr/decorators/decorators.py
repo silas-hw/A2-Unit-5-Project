@@ -38,3 +38,17 @@ def check_admin(func):
                 return func(*args, **kargs)
         return redirect(url_for('main.dashboard'))
     return wrapper
+
+def check_moderator(func):
+    '''
+    This can be used to 'wrap' any route in the website to 
+    ensure only admin users can access its content
+    '''
+    @functools.wraps(func)
+    def wrapper(*args, **kargs):
+        if 'loggedin' in session:
+            access_level = session['access']
+            if access_level >= 2:
+                return func(*args, **kargs)
+        return redirect(url_for('main.dashboard'))
+    return wrapper
