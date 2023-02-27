@@ -20,7 +20,7 @@
         <button class="edit-document" onclick="window.location.href='{{ url_for('documents.private_document', document_id=document_id) }}'">Make Private</button>
 
         {% if restricted %} 
-            <button class="edit-document" onclick="window.location.href='{{ url_for('documents.unrestrict_document', document_id=document_id) }}'">Restrict</button>
+            <button class="edit-document" onclick="window.location.href='{{ url_for('documents.unrestrict_document', document_id=document_id) }}'">Unrestrict</button>
         {% else %}
         <button class="edit-document" onclick="window.location.href='{{ url_for('documents.restrict_document', document_id=document_id) }}'">Restrict</button>
         {% endif %}
