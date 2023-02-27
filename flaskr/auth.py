@@ -113,5 +113,6 @@ def register():
         session['username'] = username
         session['email'] = email
         session['largefont'] = False
+        session['access'] = 1
 
         return redirect(url_for('main.home'))

@@ -1,7 +1,11 @@
 {% for comment in comments %} 
     <div class="comment">
-        <h4 class="comment-author"><a href="{{ url_for('users.account', account_id=comment[0]) }}">{{ comment[1] }}</a></h4>
-        <span class="comment-date"><i><b>{{ comment[3] }}</b></i></span>
-        <p class="comment-content">{{ comment[2] }}</p>
+        <h4 class="comment-author"><a href="{{ url_for('users.account', account_id=comment[1]) }}">{{ comment[2] }}</a></h4>
+        <span class="comment-date"><i><b>{{ comment[4] }}</b></i></span>
+        <p class="comment-content">{{ comment[3] }}</p>
+
+        {% if session['access']>=2 or session['userid']==comment[1] %} 
+            <a href="{{ url_for('documents.delete_comment', comment_id=comment[0]) }}">delete</a>
+        {% endif %}
     </div>
 {% endfor %}

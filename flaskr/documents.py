@@ -314,7 +314,7 @@ def comment_list(type):
         cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.num_comments, offset))
     else:
         post_id = request_data['post_id']
-        cursor = execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
+        cursor = db_conn.execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
 
     comment_ids=[id[0] for id in cursor.fetchall()]
 
@@ -334,7 +334,7 @@ def comment_list(type):
         
         date = time.strftime('%d/%m/%Y', time.localtime(dateepoch))
 
-        comment_list.append((account_id, username, content, date))
+        comment_list.append((comment_id, account_id, username, content, date))
 
     return render_template('/documents/commentlist.html', comments=comment_list)
 
@@ -384,6 +384,30 @@ def comment_document(document_id):
 
     cursor = db_conn.execute('INSERT INTO DocumentComment (CommentID, DocumentID) VALUES (?, ?)', (comment_id, document_id))
     db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('documents.document_view', document_id=document_id))
+
+@bp.route('/document/comment/delete/<comment_id>/', methods=['GET'])
+@check_loggedin
+def delete_comment(comment_id):
+    db_conn = sqlite3.connect(config.db_dir)
+
+    cursor = db_conn.execute('SELECT DocumentID FROM DocumentComment WHERE CommentID=?', (comment_id,))
+    document_id = cursor.fetchone()[0]
+
+    if session['access']==1:
+        cursor = db_conn.execute('SELECT AccountID FROM Comment WHERE CommentID=?', (comment_id,))
+        owner_id = cursor.fetchone()[0]
+
+        if session['userid'] != owner_id:
+            return redirect(url_for('documents.document_view', document_id=document_id))
+    
+    db_conn.execute('DELETE FROM DocumentComment WHERE CommentID=?', (comment_id,))
+    db_conn.commit()
+    db_conn.execute('DELETE FROM Comment WHERE CommentID=?', (comment_id))
+    db_conn.commit()
+
     db_conn.close()
 
     return redirect(url_for('documents.document_view', document_id=document_id))
