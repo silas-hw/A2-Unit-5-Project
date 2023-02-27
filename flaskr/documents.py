@@ -174,7 +174,7 @@ def delete_document(document_id):
 @bp.route('/admin/privatedoc/<document_id>/', methods=['GET'])
 @check_loggedin
 def private_document(document_id):
-    if session['access'] == 2 or session['access'] == 3:
+    if session['access'] >=2:
         db_conn = sqlite3.connect(config.db_dir)
         db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
         db_conn.commit()
