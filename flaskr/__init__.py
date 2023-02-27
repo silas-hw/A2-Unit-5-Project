@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_mail import Mail, Message
 import sqlite3
 import os
+import atexit
 
 # local imports
 from .auth import bp as auth_bp
@@ -8,6 +10,8 @@ from .main import bp as main_bp
 from .users import bp as users_bp
 from .documents import bp as documents_bp
 from .admin import bp as admin_bp
+
+from .tasks import scheduler
 
 def create_app(test_config=None):
     '''
@@ -24,5 +28,8 @@ def create_app(test_config=None):
     app.register_blueprint(users_bp)
     app.register_blueprint(documents_bp)
     app.register_blueprint(admin_bp)
+
+    scheduler.start()
+    atexit.register(scheduler.shutdown)
 
     return app
