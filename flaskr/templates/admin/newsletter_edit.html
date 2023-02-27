@@ -9,7 +9,12 @@
 
 <h2>Edit Newsletter</h3>
 
+{% if action=='edit' %}
 <form class="newsletter-form" id="newsletter-form" name="newsletter-form" action="{{ url_for('admin.edit_newsletter', newsletter_id=newsletter_id) }}" method="post">
+{% else %}
+<form class="newsletter-form" id="newsletter-form" name="newsletter-form" action="{{ url_for('admin.create_newsletter') }}" method="post">
+{% endif %}
+
     <h4>Subject</h4>
     <input type="text" id="subject" name="subject" value="{{ newsletter[2] }}">
     <label for="send_date">Send Date</label>

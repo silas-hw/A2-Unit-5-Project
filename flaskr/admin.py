@@ -114,6 +114,26 @@ def newsletters():
 
     return render_template('admin/newsletters.html', session=session, newsletters=newsletter_list)
 
+@bp.route('/admin/newsletter/create/', methods=['POST', 'GET'])
+@check_loggedin
+@check_admin
+def create_newsletter():
+    if request.method=='GET':
+        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
+    elif request.method=='POST':
+        subject = request.form['subject']
+        content = request.form['content']
+        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+
+        db_conn = sqlite3.connect(config.db_dir)
+        cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
+        db_conn.commit()
+
+        db_conn.close()
+
+        return redirect(url_for('admin.newsletters'))
+        
+
 @bp.route('/admin/newsletter/edit/<newsletter_id>', methods=['POST', 'GET'])
 @check_loggedin
 @check_admin
@@ -128,7 +148,7 @@ def edit_newsletter(newsletter_id):
 
         db_conn.close()
 
-        return render_template('admin/newsletter_edit.html', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+        return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
 
     elif request.method == 'POST':
         db_conn = sqlite3.connect(config.db_dir)
