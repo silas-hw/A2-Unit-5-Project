@@ -6,4 +6,21 @@
 <p>{{ access_level }}</p>
 <p>{{ userid }}</p>
 <p>{{ email }}</p>
+
+<div class="account-admin-options">
+    {% if session['access'] >=3 %}
+        <button class="add-page">Restrict</button>
+
+        {% if access_level==1 %}
+            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod</button>
+        {% else if access_level==2 %} 
+            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_admin', account_id=userid)}}'">Make Admin</button>
+            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-mod</button>
+        {% else if access_level==3 %} 
+            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod (De-Admin)</button>
+            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-Admin</button>
+        {% endif %} 
+
+    {% endif %}
+</div>
 {% endblock %}

@@ -28,3 +28,40 @@ def account(account_id):
 
         db_conn.close()
         return render_template('account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level)
+
+######################
+# User Access Levels #
+######################
+
+@bp.route('/account/admin/makemod/<account_id>')
+@check_loggedin
+@check_admin
+def user_mod(account_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE User SET AccessLevel=2 WHERE AccountID=?', (account_id,))
+    db_conn.close()
+    
+    return redirect(url_for('users.account', account_id=account_id))
+
+@bp.route('/account/admin/makeadmin/<account_id>')
+@check_loggedin
+@check_admin
+def user_admin(account_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE User SET AccessLevel=3 WHERE AccountID=?', (account_id,))
+    db_conn.close()
+
+    return redirect(url_for('users.account', account_id=account_id))
+
+@bp.route('/account/admin/removerights/<account_id>')
+@check_loggedin
+@check_admin
+def user_remove_rights(account_id):
+
+    db_conn = sqlite3.connect(config.db_dir)
+    db_conn.execute('UPDATE User SET AccessLevel=1 WHERE AccountID=?', (account_id,))
+    db_conn.close()
+
+    return redirect(url_for('users.account', account_id=account_id))
