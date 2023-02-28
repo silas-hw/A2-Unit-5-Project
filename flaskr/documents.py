@@ -333,6 +333,7 @@ def comment_list(type):
     db_conn = sqlite3.connect(config.db_dir)
     offset = int(request_data['offset'])*config.num_comments
 
+    # retrieve data from the corresponding table depending on whether comments for a document or comments for a community post are being retrieved
     if type=='document':
         document_id = request_data['document_id']
         cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.num_comments, offset))
@@ -373,8 +374,10 @@ def like_document(document_id):
     cursor = db_conn.execute('SElECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
     res = cursor.fetchone()
 
+    # if a like by a user already exists for the document, delete the corresponding entry in the DocumnetLike table (i.e. unlike)
     if res:
         cursor = db_conn.execute('DELETE FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
+    # if not, create an entry in the DocumentLike table
     else:
         cursor = db_conn.execute('INSERT INTO DocumentLike (AccountID, DocumentID) VALUES (?, ?)', (session['userid'], document_id))
 
@@ -416,10 +419,11 @@ def comment_document(document_id):
 @check_loggedin
 def delete_comment(comment_id):
     db_conn = sqlite3.connect(config.db_dir)
-
+ 
     cursor = db_conn.execute('SELECT DocumentID FROM DocumentComment WHERE CommentID=?', (comment_id,))
     document_id = cursor.fetchone()[0]
 
+    # if the user attempting to delete the comment is not an admin, verify that they are the one who created the comment
     if session['access']==1:
         cursor = db_conn.execute('SELECT AccountID FROM Comment WHERE CommentID=?', (comment_id,))
         owner_id = cursor.fetchone()[0]
