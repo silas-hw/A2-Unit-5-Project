@@ -7,6 +7,7 @@ import time
 
 # local imports
 from .decorators import *
+from .algorithms import *
 from .config import Config as config
 
 bp = Blueprint('documents', __name__)
@@ -343,9 +344,7 @@ def comment_list(type):
 
     comment_ids=[id[0] for id in cursor.fetchall()]
 
-    statement_tuple = '?,'*len(comment_ids)
-    statement_tuple = statement_tuple[:len(statement_tuple)-1]
-    statement = f'SELECT * FROM Comment WHERE CommentID IN ({statement_tuple}) ORDER BY DateEpoch DESC'
+    statement = f'SELECT * FROM Comment WHERE CommentID IN ({sql_prepared_tuple(len(comment_ids))}) ORDER BY DateEpoch DESC'
 
     cursor = db_conn.execute(statement, comment_ids)
     comments = cursor.fetchall()

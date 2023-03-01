@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import sqlite3
 import time
 
+from .algorithms import *
 from .config import Config as config
 
 def send_email():
@@ -26,9 +27,7 @@ def send_email():
         print(f'{__name__} EMAIL SENT\n\tSubject: {newsletter[2]}\n\tBody: {newsletter[3]}\n\tRecipients: {email_list}', flush=True)
         newsletter_ids.append(newsletter[0])
 
-    statement_tuple = '?,'*len(newsletter_list)
-    statement_tuple = statement_tuple[:len(statement_tuple)-1]
-    statement = f'UPDATE Newsletter SET sent=1 WHERE NewsletterID IN ({statement_tuple})'
+    statement = f'UPDATE Newsletter SET sent=1 WHERE NewsletterID IN ({sql_prepared_tuple(len(newsletter_ids))})'
 
     cursor = db_conn.execute(statement, newsletter_ids)
     db_conn.commit()
