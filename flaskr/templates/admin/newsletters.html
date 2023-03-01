@@ -18,7 +18,7 @@
         <div class="newsletter-content">
             <h3>{{ newsletter[3] }}</h3>
             <span><i>Created By: <a href="{{ url_for('users.account', account_id=newsletter[1]) }}">{{ newsletter[2] }}</a></i></span>
-            <span><i>Date Created: {{ newsletter[5] }}</i></span>
+            <span><i>Date to be sent: {{ newsletter[5] }}</i></span>
             <p>{{ newsletter[4][:64] }}</p>
         </div>
         
