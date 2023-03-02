@@ -13,3 +13,23 @@ def sql_prepared_tuple(length, count=1, output=""):
         return output+'?'
     else:
         return sql_prepared_tuple(length, count+1, output+'?,')
+
+def check_email(email):
+    local = False
+    seperator = False
+    domain_name = False
+    domain_toplevel = False
+
+    for i, char in enumerate(email):
+        if char == ' ':
+            return False
+        if not local and char!='@':
+            local = True
+        elif not seperator and char=='@':
+            seperator = True
+        elif not domain_name and char!='.':
+            domain_name = True
+        elif not domain_toplevel and char=='.' and i!=len(email)-1:
+            domain_toplevel = True
+
+    return (local and seperator and domain_name and domain_toplevel)
