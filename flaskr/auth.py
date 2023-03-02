@@ -6,6 +6,7 @@ import time
 
 # local imports
 from .decorators import *
+from .algorithms import *
 from .config import Config as config
 
 bp = Blueprint('auth', __name__)
@@ -83,6 +84,11 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+
+        # validation
+        if len(username)<=1 or not check_email(email):
+            return render_template('/auth/register.html', err_msg='Invalid data provided')
+
 
         # forms can only send string data, so here the newsletter field is converted into an integer boolean
         # Whilst we could technically just cast it using the int method, this way
