@@ -103,21 +103,27 @@ def add_document():
             db_conn.close()
             return redirect(url_for('documents.my_documents'))
 
-    if request.method=='GET':
-        db_conn.close()
-        return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
-    
-    elif request.method=='POST':
-        # insert the data provided in the post request into the document table
-        document_name = request.form['title']
-        document_description = request.form['description']
-        document_public = 1 if 'public' in request.form else 0
+    try:
+        if request.method=='GET':
+            db_conn.close()
+            return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
+        
+        elif request.method=='POST':
+            # insert the data provided in the post request into the document table
+            document_name = request.form['title']
+            document_description = request.form['description']
+            document_public = 1 if 'public' in request.form else 0
 
-        cursor = db_conn.execute('INSERT INTO Document (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
-        db_conn.commit()
-        db_conn.close()
+            # data validation
+            assert len(document_name)>=1, 'Document name cannot be empty'
 
-        return redirect(url_for('documents.my_documents'))
+            cursor = db_conn.execute('INSERT INTO Document (DocumentName, Description, Public, AccountID) VALUES (?, ?, ?, ?)', (document_name, document_description, document_public, session['userid']))
+            db_conn.commit()
+            db_conn.close()
+
+            return redirect(url_for('documents.my_documents'))
+    except AssertionError as err:
+        err_msg = err.message
 
 @bp.route('/document/edit/<document_id>', methods=['GET', 'POST'])
 @check_loggedin

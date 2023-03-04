@@ -1,8 +1,11 @@
+from ast import Assert
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app, jsonify
 import sqlite3
 import hashlib
 import time
 import datetime
+
+from flaskr.algorithms.algs import validate_isodate
 
 #local imports
 from .decorators import *
@@ -128,20 +131,14 @@ def create_newsletter():
             date_str = request.form['send_date']
 
             # data validation
-            if not date_str:
-                raise InvalidFormData('Send date cannot be empty')
-
-            try:
-                date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
-            except ValueError:
-                raise InvalidFormData('Date format incorrect (direct post request error)')
-
-            if date<=int(time.time()):
-                raise InvalidFormData('Send Date must be in the future')
-            if len(subject) < 1:
-                raise InvalidFormData('Subject cannot be empty')
-            if len(content) < 1:
-                raise InvalidFormData('Content cannot be empty')
+            assert date_str, 'Send data cannot be empty'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            
+            assert date>int(time.time()), 'Send Date must be in the future'
+            assert len(subject) >= 1, 'Subject cannot be empty'
+            assert len(content) >= 1, 'Content cannot be empty'
 
             db_conn = sqlite3.connect(config.db_dir)
             cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
@@ -150,7 +147,7 @@ def create_newsletter():
             db_conn.close()
 
             return redirect(url_for('admin.newsletters'))
-    except InvalidFormData as err:
+    except AssertionError as err:
         err_msg = err.message
         return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
         
@@ -181,20 +178,14 @@ def edit_newsletter(newsletter_id):
 
             # data validation
 
-            if not date_str:
-                raise InvalidFormData('Send date cannot be empty')
-
-            try:
-                date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
-            except ValueError:
-                raise InvalidFormData('Date format incorrect (direct post request error)')
-
-            if date<=int(time.time()):
-                raise InvalidFormData('Send Date must be in the future')
-            if len(subject) < 1:
-                raise InvalidFormData('Subject cannot be empty')
-            if len(content) < 1:
-                raise InvalidFormData('Content cannot be empty')
+            assert date_str, 'Send data cannot be empty'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            
+            assert date>int(time.time()), 'Send Date must be in the future'
+            assert len(subject) >= 1, 'Subject cannot be empty'
+            assert len(content) >= 1, 'Content cannot be empty'
             
             cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
             db_conn.commit()
@@ -202,7 +193,7 @@ def edit_newsletter(newsletter_id):
             db_conn.close()
 
             return redirect(url_for('admin.newsletters'))
-    except InvalidFormData as err:
+    except AssertionError as err:
         db_conn = sqlite3.connect(config.db_dir)
         cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
         newsletter = cursor.fetchone()

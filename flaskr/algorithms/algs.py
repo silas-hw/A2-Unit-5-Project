@@ -2,6 +2,7 @@
 This is a collection of algorithms that are used throughout different routes/pages of the website. They are collected here so that the
 only functions in the main set of files are route functions.
 '''
+import datetime
 
 def sql_prepared_tuple(length, count=1, output=""):
     '''
@@ -33,3 +34,10 @@ def check_email(email):
             domain_toplevel = True
 
     return (local and seperator and domain_name and domain_toplevel)
+
+def validate_isodate(date_str):
+    try:
+        datetime.date.fromisoformat(date_str)
+    except ValueError:
+        return False
+    return True

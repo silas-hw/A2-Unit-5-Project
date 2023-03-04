@@ -1,3 +1,4 @@
+from ast import Assert
 from os import access
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
@@ -79,8 +80,7 @@ def register():
 
         elif request.method == 'POST':
             # if required data hasn't been entered return an error message to the user
-            if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
-                raise InvalidFormData('Please enter all data')
+            assert 'username' in request.form and 'email' in request.form and 'password' in request.form, 'Please enter all data'
 
             # assign variables to the data provided in the post request
             username = request.form['username']
@@ -88,8 +88,12 @@ def register():
             password = request.form['password']
 
             # validation
-            if len(username)<=1 or not check_email(email):
-                raise InvalidFormData('Invalid data provided')
+            assert len(username)>=1, 'Username cannot be empty'
+            assert check_email(email), 'Invalid email format'
+            assert password!=password.upper(), 'Password must contain a lowercase letter'
+            assert password!=password.lower(), 'Password must contain an uppercase letter'
+            assert any(char.isdigit() for char in password), 'Password must contain a number'
+            assert any(not char.isalnum() and not char==' ' for char in password), 'Password must contain a special character'
 
             # forms can only send string data, so here the newsletter field is converted into an integer boolean
             # Whilst we could technically just cast it using the int method, this way
@@ -104,8 +108,7 @@ def register():
             res = cursor.fetchone()
             
             # if the account already exists, reload the register page but with an error message
-            if res:
-                raise InvalidFormData('Username and/or Email already in use')
+            assert not res, 'Username and/or Email already in use'
             
             # insert the new account information into the User table within the database
             db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
@@ -123,6 +126,6 @@ def register():
             session['access'] = 1
 
             return redirect(url_for('main.home'))
-    except InvalidFormData as err:
+    except AssertionError as err:
         err_msg = err.message
         return render_template('/auth/register.html', err_msg=err_msg)
