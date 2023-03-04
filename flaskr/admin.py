@@ -186,7 +186,7 @@ def edit_newsletter(newsletter_id):
             assert len(subject) >= 1, 'Subject cannot be empty'
             assert len(content) >= 1, 'Content cannot be empty'
             
-            cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
+            cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=? WHERE NewsletterID=?', (subject, content, date, newsletter_id))
             db_conn.commit()
 
             db_conn.close()
