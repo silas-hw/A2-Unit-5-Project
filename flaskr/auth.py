@@ -8,6 +8,7 @@ import time
 from .decorators import *
 from .algorithms import *
 from .config import Config as config
+from .exceptions import *
 
 bp = Blueprint('auth', __name__)
 
@@ -72,53 +73,56 @@ def register():
     to use.
     '''
     
-    if request.method == 'GET':
-        return render_template('/auth/register.html', err_msg='')
+    try:
+        if request.method == 'GET':
+            return render_template('/auth/register.html', err_msg='')
 
-    elif request.method == 'POST':
-        # if required data hasn't been entered return an error message to the user
-        if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
-            return render_template('/auth/register.html', err_msg='Please enter all data')
+        elif request.method == 'POST':
+            # if required data hasn't been entered return an error message to the user
+            if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
+                raise InvalidFormData('Please enter all data')
 
-        # assign variables to the data provided in the post request
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+            # assign variables to the data provided in the post request
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
 
-        # validation
-        if len(username)<=1 or not check_email(email):
-            return render_template('/auth/register.html', err_msg='Invalid data provided')
+            # validation
+            if len(username)<=1 or not check_email(email):
+                raise InvalidFormData('Invalid data provided')
 
+            # forms can only send string data, so here the newsletter field is converted into an integer boolean
+            # Whilst we could technically just cast it using the int method, this way
+            # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
+            newsletter = 1 if "newsletter" in request.form else 0 
 
-        # forms can only send string data, so here the newsletter field is converted into an integer boolean
-        # Whilst we could technically just cast it using the int method, this way
-        # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
-        newsletter = 1 if "newsletter" in request.form else 0 
+            password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+            # create an sqlite connection to check if the account already exists
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
+            res = cursor.fetchone()
+            
+            # if the account already exists, reload the register page but with an error message
+            if res:
+                raise InvalidFormData('Username and/or Email already in use')
+            
+            # insert the new account information into the User table within the database
+            db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
+            db_conn.commit()
 
-        # create an sqlite connection to check if the account already exists
-        db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
-        res = cursor.fetchone()
-        
-        # if the account already exists, reload the register page but with an error message
-        if res:
-            return render_template('/auth/register.html', err_msg='Username and/or Email already in use')
-        
-        # insert the new account information into the User table within the database
-        db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
-        db_conn.commit()
+            # create a session for the user, automatically logging them in upon account creation
+            userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
+            db_conn.close()
 
-        # create a session for the user, automatically logging them in upon account creation
-        userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
-        db_conn.close()
+            session['loggedin'] = True
+            session['userid'] = userid
+            session['username'] = username
+            session['email'] = email
+            session['largefont'] = False
+            session['access'] = 1
 
-        session['loggedin'] = True
-        session['userid'] = userid
-        session['username'] = username
-        session['email'] = email
-        session['largefont'] = False
-        session['access'] = 1
-
-        return redirect(url_for('main.home'))
+            return redirect(url_for('main.home'))
+    except InvalidFormData as err:
+        err_msg = err.message
+        return render_template('/auth/register.html', err_msg=err_msg)
