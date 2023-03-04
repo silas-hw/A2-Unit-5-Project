@@ -123,7 +123,10 @@ def add_document():
 
             return redirect(url_for('documents.my_documents'))
     except AssertionError as err:
+        db_conn.close()
+
         err_msg = err.message
+        return render_template('/documents/editdocument.html', action='add', doc_title='', doc_description='', err_msg=err_msg)
 
 @bp.route('/document/edit/<document_id>', methods=['GET', 'POST'])
 @check_loggedin
@@ -142,25 +145,34 @@ def edit_document(document_id):
 
     cursor = db_conn.execute('SELECT * FROM Document WHERE DocumentID=?', (document_id,))
     if not cursor.fetchone():
+        db_conn.close()
         return redirect(url_for('documents.my_documents'))
+    
+    cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
+    title, description = cursor.fetchone()
 
-    if request.method=='GET':
-        cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
-        title, description = cursor.fetchone()
-        return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
-    elif request.method=='POST':
-        document_name = request.form['title']
-        document_description = request.form['description']
-        document_public = 1 if 'public' in request.form else 0
+    try:
+        if request.method=='GET':
+            db_conn.close()
+            return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
+        elif request.method=='POST':
+            document_name = request.form['title']
+            document_description = request.form['description']
+            document_public = 1 if 'public' in request.form else 0
 
-        # data validation
-        assert len(document_name)>=1, 'Document name cannot be empty'
+            # data validation
+            assert len(document_name)>=1, 'Document name cannot be empty'
 
-        cursor = db_conn.execute('UPDATE Document SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
-        db_conn.commit()
+            cursor = db_conn.execute('UPDATE Document SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
+            db_conn.commit()
+            db_conn.close()
+
+            return redirect(url_for('documents.my_documents'))
+    except AssertionError as err:
         db_conn.close()
 
-        return redirect(url_for('documents.my_documents'))
+        err_msg = err.message
+        return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description, err_msg=err_msg)
 
 @bp.route('/document/delete/<document_id>/', methods=['GET'])
 @check_loggedin
@@ -287,8 +299,10 @@ def add_page(document_id):
 
             return redirect(url_for('documents.document_view', document_id=document_id))
     except AssertionError as err:
-        err_msg = err_msg
-        return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add')
+        db_conn.close()
+
+        err_msg = err.message()
+        return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add', err_msg=err_msg)
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -305,19 +319,27 @@ def edit_page(page_id):
     if session['userid']!=account_id:
         db_conn.close()
         return 'You do not own the document this page is attached to'
+    
+    try:
+        if request.method=='GET':
+            db_conn.close()
+            return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit')
+        elif request.method=='POST':
+            title = request.form['title']
+            content = request.form['content']
 
-    if request.method=='GET':
-        db_conn.close()
-        return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit')
-    elif request.method=='POST':
-        title = request.form['title']
-        content = request.form['content']
+            assert len(title)>=1, 'Page title cannot be empty'
 
-        cursor = db_conn.execute('UPDATE Page SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
-        db_conn.commit()
+            cursor = db_conn.execute('UPDATE Page SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
+            db_conn.commit()
+            db_conn.close()
+            
+            return redirect(url_for('documents.page_view', page_id=page_id))
+    except AssertionError as err:
         db_conn.close()
         
-        return redirect(url_for('documents.page_view', page_id=page_id))
+        err_msg = err.message
+        return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', err_msg=err_msg)
 
 @bp.route('/page/delete/<page_id>/', methods=['GET'])
 @check_loggedin
@@ -329,6 +351,10 @@ def delete_page(page_id):
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, DocumentID FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     page_account_id, document_id = cursor.fetchone()
+
+    if not document_id:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
 
     if session['userid'] != page_account_id:
         db_conn.close()
