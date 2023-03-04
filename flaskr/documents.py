@@ -484,6 +484,7 @@ def delete_comment(comment_id):
         owner_id = cursor.fetchone()[0]
 
         if session['userid'] != owner_id:
+            db_conn.close()
             return redirect(url_for('documents.document_view', document_id=document_id))
     
     db_conn.execute('DELETE FROM DocumentComment WHERE CommentID=?', (comment_id,))
