@@ -161,6 +161,10 @@ def edit_newsletter(newsletter_id):
             db_conn = sqlite3.connect(config.db_dir)
             cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
             newsletter = cursor.fetchone()
+
+            if not newsletter:
+                return redirect(url_for('admin.newsletters'))
+                
             newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
             date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
