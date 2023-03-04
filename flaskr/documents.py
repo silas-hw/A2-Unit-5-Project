@@ -138,7 +138,11 @@ def edit_document(document_id):
 
     if session['userid'] != account_id:
         db_conn.close()
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('documents.my_documents'))
+
+    cursor = db_conn.execute('SELECT * FROM Document WHERE DocumentID=?', (document_id,))
+    if not cursor.fetchone():
+        return redirect(url_for('documents.my_documents'))
 
     if request.method=='GET':
         cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
@@ -148,6 +152,9 @@ def edit_document(document_id):
         document_name = request.form['title']
         document_description = request.form['description']
         document_public = 1 if 'public' in request.form else 0
+
+        # data validation
+        assert len(document_name)>=1, 'Document name cannot be empty'
 
         cursor = db_conn.execute('UPDATE Document SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
         db_conn.commit()
