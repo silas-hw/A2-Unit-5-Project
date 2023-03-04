@@ -10,7 +10,6 @@ from flaskr.algorithms.algs import validate_isodate
 #local imports
 from .decorators import *
 from .config import Config as config
-from .exceptions import *
 
 bp = Blueprint('admin', __name__)
 

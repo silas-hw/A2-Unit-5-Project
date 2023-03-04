@@ -9,7 +9,6 @@ import time
 from .decorators import *
 from .algorithms import *
 from .config import Config as config
-from .exceptions import *
 
 bp = Blueprint('auth', __name__)
 
