@@ -270,19 +270,25 @@ def add_page(document_id):
         db_conn.close()
         return 'You do not own this document'
 
-    if request.method=='GET':
-        db_conn.close()
-        return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
+    try:
+        if request.method=='GET':
+            db_conn.close()
+            return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
 
-    elif request.method=='POST':
-        title = request.form['title']
-        content = request.form['content']
+        elif request.method=='POST':
+            title = request.form['title']
+            content = request.form['content']
 
-        cursor = db_conn.execute('INSERT INTO Page (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
-        db_conn.commit()
-        db_conn.close()
+            assert len(title)>=1, 'Page title cannot be empty'
 
-        return redirect(url_for('documents.document_view', document_id=document_id))
+            cursor = db_conn.execute('INSERT INTO Page (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
+            db_conn.commit()
+            db_conn.close()
+
+            return redirect(url_for('documents.document_view', document_id=document_id))
+    except AssertionError as err:
+        err_msg = err_msg
+        return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add')
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 @check_loggedin
