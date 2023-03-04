@@ -337,7 +337,7 @@ def edit_page(page_id):
             return redirect(url_for('documents.page_view', page_id=page_id))
     except AssertionError as err:
         db_conn.close()
-        
+
         err_msg = err.message
         return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', err_msg=err_msg)
 
@@ -415,6 +415,12 @@ def like_document(document_id):
     '''
 
     db_conn = sqlite3.connect(config.db_dir)
+
+    cursor = db_conn.execute('SEleCT * FROM Document WHERE DocumentID=?', (document_id))
+    if not cursor.fetchone():
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
     cursor = db_conn.execute('SElECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
     res = cursor.fetchone()
 
@@ -440,13 +446,18 @@ def comment_document(document_id):
     '''
     Adds a comment to a document
     '''
+    db_conn = sqlite3.connect(config.db_dir)
+
+    cursor = db_conn.execute('SElECT * FROM Document WHERE DocumentID=?', (document_id,))
+    if not cursor.fetchone():
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
 
     content = request.form['content']
     if len(content)==0:
         redirect(url_for('documents.document_view', document_id=document_id)), 304
-    dateepoch = int(time.time())
     
-    db_conn = sqlite3.connect(config.db_dir)
+    dateepoch = int(time.time())
     cursor = db_conn.execute('INSERT INTO Comment (AccountID, Content, DateEpoch) VALUES (?, ?, ?)', (session['userid'], content, dateepoch))
     db_conn.commit()
 
