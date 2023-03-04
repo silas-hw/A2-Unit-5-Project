@@ -185,6 +185,9 @@ def edit_newsletter(newsletter_id):
             assert date>int(time.time()), 'Send Date must be in the future'
             assert len(subject) >= 1, 'Subject cannot be empty'
             assert len(content) >= 1, 'Content cannot be empty'
+
+            cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+            assert cursor.fetchone(), "NewsletterID doesn't exist"
             
             cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=? WHERE NewsletterID=?', (subject, content, date, newsletter_id))
             db_conn.commit()
