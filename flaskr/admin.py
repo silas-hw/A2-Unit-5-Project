@@ -7,6 +7,7 @@ import datetime
 #local imports
 from .decorators import *
 from .config import Config as config
+from .exceptions import *
 
 bp = Blueprint('admin', __name__)
 
@@ -118,20 +119,40 @@ def newsletters():
 @check_loggedin
 @check_admin
 def create_newsletter():
-    if request.method=='GET':
-        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
-    elif request.method=='POST':
-        subject = request.form['subject']
-        content = request.form['content']
-        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+    try:
+        if request.method=='GET':
+            return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
+        elif request.method=='POST':
+            subject = request.form['subject']
+            content = request.form['content']
+            date_str = request.form['send_date']
 
-        db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
-        db_conn.commit()
+            # data validation
+            if not date_str:
+                raise InvalidFormData('Send date cannot be empty')
 
-        db_conn.close()
+            try:
+                date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            except ValueError:
+                raise InvalidFormData('Date format incorrect (direct post request error)')
 
-        return redirect(url_for('admin.newsletters'))
+            if date<=int(time.time()):
+                raise InvalidFormData('Send Date must be in the future')
+            if len(subject) < 1:
+                raise InvalidFormData('Subject cannot be empty')
+            if len(content) < 1:
+                raise InvalidFormData('Content cannot be empty')
+
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
+            db_conn.commit()
+
+            db_conn.close()
+
+            return redirect(url_for('admin.newsletters'))
+    except InvalidFormData as err:
+        err_msg = err.message
+        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
         
 
 @bp.route('/admin/newsletter/edit/<newsletter_id>', methods=['POST', 'GET'])
@@ -139,29 +160,61 @@ def create_newsletter():
 @check_admin
 def edit_newsletter(newsletter_id):
 
-    if request.method == 'GET':
+    try:
+        if request.method == 'GET':
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+            newsletter = cursor.fetchone()
+            newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
+
+            date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
+
+            db_conn.close()
+
+            return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+
+        elif request.method == 'POST':
+            db_conn = sqlite3.connect(config.db_dir)
+            subject = request.form['subject']
+            content = request.form['content']
+            date_str = request.form['send_date']
+
+            # data validation
+
+            if not date_str:
+                raise InvalidFormData('Send date cannot be empty')
+
+            try:
+                date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            except ValueError:
+                raise InvalidFormData('Date format incorrect (direct post request error)')
+
+            if date<=int(time.time()):
+                raise InvalidFormData('Send Date must be in the future')
+            if len(subject) < 1:
+                raise InvalidFormData('Subject cannot be empty')
+            if len(content) < 1:
+                raise InvalidFormData('Content cannot be empty')
+            
+            cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
+            db_conn.commit()
+
+            db_conn.close()
+
+            return redirect(url_for('admin.newsletters'))
+    except InvalidFormData as err:
         db_conn = sqlite3.connect(config.db_dir)
         cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
         newsletter = cursor.fetchone()
+        newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
         date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
 
         db_conn.close()
 
-        return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+        err_msg = err.message
 
-    elif request.method == 'POST':
-        db_conn = sqlite3.connect(config.db_dir)
-        subject = request.form['subject']
-        content = request.form['content']
-        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
-
-        cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
-        db_conn.commit()
-
-        db_conn.close()
-
-        return redirect(url_for('admin.newsletters'))
+        return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str, err_msg=err_msg)
 
 @bp.route('/admin/newsletter/<newsletter_id>')
 @check_loggedin
