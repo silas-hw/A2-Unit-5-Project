@@ -85,6 +85,7 @@ def register():
             username = request.form['username']
             email = request.form['email']
             password = request.form['password']
+            password2 = request.form['password2']
 
             # validation
             assert len(username)>=1, 'Username cannot be empty'
@@ -93,7 +94,7 @@ def register():
             assert password!=password.lower(), 'Password must contain an uppercase letter'
             assert any(char.isdigit() for char in password), 'Password must contain a number'
             assert any(not char.isalnum() and not char==' ' for char in password), 'Password must contain a special character'
-
+            assert password==password2, 'Passwords do not match'
             # forms can only send string data, so here the newsletter field is converted into an integer boolean
             # Whilst we could technically just cast it using the int method, this way
             # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
@@ -110,7 +111,7 @@ def register():
             assert not res, 'Username and/or Email already in use'
             
             # insert the new account information into the User table within the database
-            db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
+            db_conn.execute('INSERT INTO User (username, email, password, ReceiveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
             db_conn.commit()
 
             # create a session for the user, automatically logging them in upon account creation
@@ -126,5 +127,5 @@ def register():
 
             return redirect(url_for('main.home'))
     except AssertionError as err:
-        err_msg = err.message
+        err_msg = err
         return render_template('/auth/register.html', err_msg=err_msg)

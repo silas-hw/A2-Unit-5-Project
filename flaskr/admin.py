@@ -147,7 +147,7 @@ def create_newsletter():
 
             return redirect(url_for('admin.newsletters'))
     except AssertionError as err:
-        err_msg = err.message
+        err_msg = err
         return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
         
 
@@ -209,7 +209,7 @@ def edit_newsletter(newsletter_id):
 
         db_conn.close()
 
-        err_msg = err.message
+        err_msg = err
 
         return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str, err_msg=err_msg)
 

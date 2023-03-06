@@ -125,7 +125,7 @@ def add_document():
     except AssertionError as err:
         db_conn.close()
 
-        err_msg = err.message
+        err_msg = err
         return render_template('/documents/editdocument.html', action='add', doc_title='', doc_description='', err_msg=err_msg)
 
 @bp.route('/document/edit/<document_id>', methods=['GET', 'POST'])
@@ -171,7 +171,7 @@ def edit_document(document_id):
     except AssertionError as err:
         db_conn.close()
 
-        err_msg = err.message
+        err_msg = err
         return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description, err_msg=err_msg)
 
 @bp.route('/document/delete/<document_id>/', methods=['GET'])
@@ -301,7 +301,7 @@ def add_page(document_id):
     except AssertionError as err:
         db_conn.close()
 
-        err_msg = err.message()
+        err_msg = err()
         return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add', err_msg=err_msg)
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
@@ -338,7 +338,7 @@ def edit_page(page_id):
     except AssertionError as err:
         db_conn.close()
 
-        err_msg = err.message
+        err_msg = err
         return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', err_msg=err_msg)
 
 @bp.route('/page/delete/<page_id>/', methods=['GET'])
