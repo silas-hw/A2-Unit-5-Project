@@ -1,8 +1,11 @@
+from ast import Assert
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app, jsonify
 import sqlite3
 import hashlib
 import time
 import datetime
+
+from flaskr.algorithms.algs import validate_isodate
 
 #local imports
 from .decorators import *
@@ -118,20 +121,34 @@ def newsletters():
 @check_loggedin
 @check_admin
 def create_newsletter():
-    if request.method=='GET':
-        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
-    elif request.method=='POST':
-        subject = request.form['subject']
-        content = request.form['content']
-        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+    try:
+        if request.method=='GET':
+            return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
+        elif request.method=='POST':
+            subject = request.form['subject']
+            content = request.form['content']
+            date_str = request.form['send_date']
 
-        db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
-        db_conn.commit()
+            # data validation
+            assert date_str, 'Send data cannot be empty'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            
+            assert date>int(time.time()), 'Send Date must be in the future'
+            assert len(subject) >= 1, 'Subject cannot be empty'
+            assert len(content) >= 1, 'Content cannot be empty'
 
-        db_conn.close()
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
+            db_conn.commit()
 
-        return redirect(url_for('admin.newsletters'))
+            db_conn.close()
+
+            return redirect(url_for('admin.newsletters'))
+    except AssertionError as err:
+        err_msg = err.message
+        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
         
 
 @bp.route('/admin/newsletter/edit/<newsletter_id>', methods=['POST', 'GET'])
@@ -139,29 +156,62 @@ def create_newsletter():
 @check_admin
 def edit_newsletter(newsletter_id):
 
-    if request.method == 'GET':
+    try:
+        if request.method == 'GET':
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+            newsletter = cursor.fetchone()
+
+            if not newsletter:
+                return redirect(url_for('admin.newsletters'))
+                
+            newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
+
+            date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
+
+            db_conn.close()
+
+            return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+
+        elif request.method == 'POST':
+            db_conn = sqlite3.connect(config.db_dir)
+            subject = request.form['subject']
+            content = request.form['content']
+            date_str = request.form['send_date']
+
+            # data validation
+
+            assert date_str, 'Send data cannot be empty'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            
+            assert date>int(time.time()), 'Send Date must be in the future'
+            assert len(subject) >= 1, 'Subject cannot be empty'
+            assert len(content) >= 1, 'Content cannot be empty'
+
+            cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+            assert cursor.fetchone(), "NewsletterID doesn't exist"
+            
+            cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=? WHERE NewsletterID=?', (subject, content, date, newsletter_id))
+            db_conn.commit()
+
+            db_conn.close()
+
+            return redirect(url_for('admin.newsletters'))
+    except AssertionError as err:
         db_conn = sqlite3.connect(config.db_dir)
         cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
         newsletter = cursor.fetchone()
+        newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
         date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
 
         db_conn.close()
 
-        return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
+        err_msg = err.message
 
-    elif request.method == 'POST':
-        db_conn = sqlite3.connect(config.db_dir)
-        subject = request.form['subject']
-        content = request.form['content']
-        date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
-
-        cursor = db_conn.execute('UPDATE Newsletter SET Subject=?, Content=?, DateSendEpoch=?', (subject, content, date))
-        db_conn.commit()
-
-        db_conn.close()
-
-        return redirect(url_for('admin.newsletters'))
+        return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str, err_msg=err_msg)
 
 @bp.route('/admin/newsletter/<newsletter_id>')
 @check_loggedin

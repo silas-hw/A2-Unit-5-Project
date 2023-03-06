@@ -9,6 +9,7 @@
 
 <h2>Edit Newsletter</h3>
 
+<p class="error-msg">{{ err_msg }}</p>
 {% if action=='edit' %}
 <form class="newsletter-form" id="newsletter-form" name="newsletter-form" action="{{ url_for('admin.edit_newsletter', newsletter_id=newsletter_id) }}" method="post">
 {% else %}

@@ -1,3 +1,4 @@
+from ast import Assert
 from os import access
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
@@ -6,6 +7,7 @@ import time
 
 # local imports
 from .decorators import *
+from .algorithms import *
 from .config import Config as config
 
 bp = Blueprint('auth', __name__)
@@ -71,48 +73,58 @@ def register():
     to use.
     '''
     
-    if request.method == 'GET':
-        return render_template('/auth/register.html', err_msg='')
+    try:
+        if request.method == 'GET':
+            return render_template('/auth/register.html', err_msg='')
 
-    elif request.method == 'POST':
-        # if required data hasn't been entered return an error message to the user
-        if 'username' not in request.form or 'email' not in request.form or 'password' not in request.form:
-            return render_template('/auth/register.html', err_msg='Please enter all data')
+        elif request.method == 'POST':
+            # if required data hasn't been entered return an error message to the user
+            assert 'username' in request.form and 'email' in request.form and 'password' in request.form, 'Please enter all data'
 
-        # assign variables to the data provided in the post request
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+            # assign variables to the data provided in the post request
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
 
-        # forms can only send string data, so here the newsletter field is converted into an integer boolean
-        # Whilst we could technically just cast it using the int method, this way
-        # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
-        newsletter = 1 if "newsletter" in request.form else 0 
+            # validation
+            assert len(username)>=1, 'Username cannot be empty'
+            assert check_email(email), 'Invalid email format'
+            assert password!=password.upper(), 'Password must contain a lowercase letter'
+            assert password!=password.lower(), 'Password must contain an uppercase letter'
+            assert any(char.isdigit() for char in password), 'Password must contain a number'
+            assert any(not char.isalnum() and not char==' ' for char in password), 'Password must contain a special character'
 
-        password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+            # forms can only send string data, so here the newsletter field is converted into an integer boolean
+            # Whilst we could technically just cast it using the int method, this way
+            # prevents any hiccups if something other than 1 or 0 is sent by assuming it to be 0
+            newsletter = 1 if "newsletter" in request.form else 0 
 
-        # create an sqlite connection to check if the account already exists
-        db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
-        res = cursor.fetchone()
-        
-        # if the account already exists, reload the register page but with an error message
-        if res:
-            return render_template('/auth/register.html', err_msg='Username and/or Email already in use')
-        
-        # insert the new account information into the User table within the database
-        db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
-        db_conn.commit()
+            password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-        # create a session for the user, automatically logging them in upon account creation
-        userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
-        db_conn.close()
+            # create an sqlite connection to check if the account already exists
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
+            res = cursor.fetchone()
+            
+            # if the account already exists, reload the register page but with an error message
+            assert not res, 'Username and/or Email already in use'
+            
+            # insert the new account information into the User table within the database
+            db_conn.execute('INSERT INTO User (username, email, password, RecieveNewsletter) VALUES (?, ?, ?, ?)', (username, email, password_hash, newsletter))
+            db_conn.commit()
 
-        session['loggedin'] = True
-        session['userid'] = userid
-        session['username'] = username
-        session['email'] = email
-        session['largefont'] = False
-        session['access'] = 1
+            # create a session for the user, automatically logging them in upon account creation
+            userid = db_conn.execute('SELECT AccountID FROM User WHERE Email=?', (email,)).fetchone()[0]
+            db_conn.close()
 
-        return redirect(url_for('main.home'))
+            session['loggedin'] = True
+            session['userid'] = userid
+            session['username'] = username
+            session['email'] = email
+            session['largefont'] = False
+            session['access'] = 1
+
+            return redirect(url_for('main.home'))
+    except AssertionError as err:
+        err_msg = err.message
+        return render_template('/auth/register.html', err_msg=err_msg)
