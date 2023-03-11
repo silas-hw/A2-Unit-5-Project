@@ -12,7 +12,7 @@
 {% elif action=='edit' %}
 <form id='document' action="{{ url_for('documents.edit_document', document_id=document_id) }}" method="post">
 {% endif %}
-
+    <p class="error-msg">{{ err_msg }}</p>
     <h3>Document Title</h3>
     <input type="text" name="title" style="display:block" value="{{ doc_title }}" required>
     <h3>Description</h3>
