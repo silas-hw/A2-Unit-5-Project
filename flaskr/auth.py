@@ -49,7 +49,7 @@ def login():
         else:
             # reload the login page but with an error message
             # err_msg will be inserted into the login.html template by jinja2
-            return render_template('/auth/login.html', err_msg='Incorrect Username or Password')
+            return render_template('/auth/login.html', err_msg='Incorrect Email or Password')
 
     return render_template('/auth/login.html', err_msg='')
 
