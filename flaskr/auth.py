@@ -88,7 +88,7 @@ def register():
             password2 = request.form['password2']
 
             # validation
-            assert len(username)>=1, 'Username cannot be empty'
+            assert len(username)>3, 'Username is too short'
             assert check_email(email), 'Invalid email format'
             assert password!=password.upper(), 'Password must contain a lowercase letter'
             assert password!=password.lower(), 'Password must contain an uppercase letter'
