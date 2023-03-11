@@ -10,7 +10,9 @@ def sql_prepared_tuple(length, count=1, output=""):
     question marks seperated by commas, such to be inserted into an SQL statement where an
     array needs to be taken as a value.
     '''
-    if count==length:
+    if length == 0:
+        return ''
+    elif count==length:
         return output+'?'
     else:
         return sql_prepared_tuple(length, count+1, output+'?,')
