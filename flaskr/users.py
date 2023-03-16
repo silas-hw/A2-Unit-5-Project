@@ -37,6 +37,9 @@ def account(account_id):
 @check_loggedin
 @check_admin
 def user_mod(account_id):
+    '''
+    Makes the access level of a user equal to that of a moderator
+    '''
 
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE User SET AccessLevel=2 WHERE AccountID=?', (account_id,))
@@ -48,6 +51,9 @@ def user_mod(account_id):
 @check_loggedin
 @check_admin
 def user_admin(account_id):
+    '''
+    Makes the access rights of a user equal to that of an admin
+    '''
 
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE User SET AccessLevel=3 WHERE AccountID=?', (account_id,))
@@ -59,6 +65,9 @@ def user_admin(account_id):
 @check_loggedin
 @check_admin
 def user_remove_rights(account_id):
+    '''
+    Removes all the access rights of a user, returning them to a 'standard' user.
+    '''
 
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE User SET AccessLevel=1 WHERE AccountID=?', (account_id,))

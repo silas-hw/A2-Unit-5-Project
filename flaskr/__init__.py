@@ -18,17 +18,20 @@ def create_app(test_config=None):
     This is used by flask when passing the 'flask run' command in the commandline.
     '''
 
+    # create a flask app
     app = Flask(__name__)
 
     app.secret_key = 'secretekey'
     
+    # register all of the imported blueprints to the application
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(documents_bp)
     app.register_blueprint(admin_bp)
 
+    # start the scheduler so that emails can be sent
     scheduler.start()
-    atexit.register(scheduler.shutdown)
+    atexit.register(scheduler.shutdown) # stops the scheduler when the program closes (i.e. when the server stops running)
 
     return app

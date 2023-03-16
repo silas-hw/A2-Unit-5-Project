@@ -201,6 +201,9 @@ def delete_document(document_id):
 @check_loggedin
 @check_moderator
 def private_document(document_id):
+    '''
+    Allows a document to be privated by its owner or a moderator
+    '''
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
@@ -212,7 +215,9 @@ def private_document(document_id):
 @check_loggedin
 @check_moderator
 def restrict_document(document_id):
-
+    '''
+    Allows a document to be restricted by a moderator.
+    '''
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE Document SET Restricted=1 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
@@ -224,6 +229,9 @@ def restrict_document(document_id):
 @check_loggedin
 @check_moderator
 def unrestrict_document(document_id):
+    '''
+    Allows a document to be unrestricted by a moderator
+    '''
 
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE Document SET Restricted=0 WHERE DocumentID=?', (document_id,))
