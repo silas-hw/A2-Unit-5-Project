@@ -263,7 +263,7 @@ def page_view(page_id):
     md_content = cursor.fetchone()[0]
     db_conn.close()
     
-    html_content = markdown.markdown(md_content)
+    html_content = markdown.markdown(md_content, extensions=['fenced_code', 'tables'])
     
     return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
 
