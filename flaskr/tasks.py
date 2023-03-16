@@ -10,6 +10,9 @@ from .algorithms import *
 from .config import Config as config
 
 def send_email():
+    '''
+    Sends all unsent emails if their send-date is before or equal to the current time.
+    '''
     db_conn=sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT Email FROM User WHERE RecieveNewsletter=1')
     email_list = [email[0] for email in cursor.fetchall()]

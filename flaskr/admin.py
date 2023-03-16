@@ -5,8 +5,6 @@ import hashlib
 import time
 import datetime
 
-from flaskr.algorithms.algs import validate_isodate
-
 #local imports
 from .decorators import *
 from .config import Config as config
@@ -17,6 +15,10 @@ bp = Blueprint('admin', __name__)
 @check_loggedin
 @check_admin
 def admin_portal():
+    '''
+    The admin homepage. Here the admins can access all the other admin parts of the website.
+    '''
+    # count the number of accounts that have been created
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SElECT COUNT(AccountID) FROM User')
     num_users = cursor.fetchone()[0]
@@ -32,6 +34,11 @@ def admin_portal():
 @check_loggedin
 @check_admin
 def database_view():
+    '''
+    This displays a view of the different tables within the database. The actual data is retrieved by
+    Javascript on the client-end, being formatted by the database_table() route depending on what
+    table, search options and filters the user has chosen.
+    '''
     db_conn = sqlite3.connect(config.db_dir)
 
     cursor = db_conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'") # retrieves a list of the names of every table in the database
@@ -45,6 +52,10 @@ def database_view():
 @check_loggedin
 @check_admin
 def database_table():
+    '''
+    Returns a table from the database as HTML
+    '''
+
     table = request.args.get('table')
     field = request.args.get('field')
     query = request.args.get('q')
@@ -80,6 +91,9 @@ def database_table():
 @check_loggedin
 @check_admin
 def database_fieldnames():
+    '''
+    Returns a list of the fieldnames for a database
+    '''
     table = request.args.get('table')
 
     db_conn = sqlite3.connect(config.db_dir)
@@ -98,6 +112,9 @@ def database_fieldnames():
 @check_loggedin
 @check_admin
 def newsletters():
+    '''
+    Returns a list of newsletters in order of their NewsletterID. 
+    '''
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT * FROM Newsletter')
     newsletter_list = cursor.fetchall()
@@ -121,6 +138,10 @@ def newsletters():
 @check_loggedin
 @check_admin
 def create_newsletter():
+    '''
+    Either returns a HTML form for admins to create a newsletter, or processes provided data
+    for a new newsletter to be created.
+    '''
     try:
         if request.method=='GET':
             return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
@@ -155,7 +176,11 @@ def create_newsletter():
 @check_loggedin
 @check_admin
 def edit_newsletter(newsletter_id):
-
+    '''
+    Either returns a form for a newsletter to be edited (with the fields being
+    filled with the newsletters current data), or processes provided data to update
+    the data stored under a certain NewsletterID.
+    '''
     try:
         if request.method == 'GET':
             db_conn = sqlite3.connect(config.db_dir)
@@ -217,4 +242,7 @@ def edit_newsletter(newsletter_id):
 @check_loggedin
 @check_admin
 def delete_newsletter(newsletter_id):
+    '''
+    Removes the row in the database associated with a certain NewsletterID
+    '''
     return 'Coming Soon', 404
