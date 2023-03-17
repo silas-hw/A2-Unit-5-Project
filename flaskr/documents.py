@@ -456,8 +456,14 @@ def comment_document(document_id):
     '''
     db_conn = sqlite3.connect(config.db_dir)
 
-    cursor = db_conn.execute('SElECT * FROM Document WHERE DocumentID=?', (document_id,))
-    if not cursor.fetchone():
+    cursor = db_conn.execute('SElECT AccountID, Public FROM Document WHERE DocumentID=?', (document_id,))
+    res = cursor.fetchone()
+    if not res:
+        db_conn.close()
+        return redirect(url_for('main.dashboard'))
+
+    owner_id, public = res
+    if session['userid']!=owner_id and public==0:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
