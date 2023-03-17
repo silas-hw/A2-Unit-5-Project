@@ -7,6 +7,7 @@ import datetime
 
 #local imports
 from .decorators import *
+from .algorithms import *
 from .config import Config as config
 
 bp = Blueprint('admin', __name__)
@@ -245,4 +246,16 @@ def delete_newsletter(newsletter_id):
     '''
     Removes the row in the database associated with a certain NewsletterID
     '''
-    return 'Coming Soon', 404
+    db_conn = sqlite3.connect(config.db_dir)
+    cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+    res = cursor.fetchone()
+    
+    if not res:
+        db_conn.close()
+        return redirect(url_for('admin.newsletters'))
+
+    db_conn.execute('DELETE FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
+    db_conn.commit()
+    db_conn.close()
+
+    return redirect(url_for('admin.newsletters'))

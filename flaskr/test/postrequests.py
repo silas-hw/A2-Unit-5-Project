@@ -96,7 +96,37 @@ def like_document4():
 
     requests.post(domain+'logout/')
 
+def create_newsletter4():
+    url = domain+'login/'
+    data = accounts['2']
+    requests.post(url, json=data)
+
+    url = domain+'admin/newsletter/create/'
+    data = {
+        'subject':'Welcome',
+        'content':'HAHAAH I HAVE BROKEN INTO THE SYSTEM',
+        'send_date':'2050-10-02'
+    }
+    requests.post(url, json=data)
+    
+    requests.post(domain+'logout/')
+
+def edit_newsletter3():
+    url = domain+'login/'
+    data = accounts['2']
+    requests.post(url, json=data)
+
+    url = domain+'admin/newsletter/edit/1'
+    data = {
+        'subject':'Welcome',
+        'content':'HAHAAH I HAVE BROKEN INTO THE SYSTEM',
+        'send_date':'2024-04-92'
+    }
+    requests.post(url, json=data)
+    
+    requests.post(domain+'logout/')
+
 
 if __name__ == '__main__':
-    like_document4()
+    edit_newsletter3()
     
