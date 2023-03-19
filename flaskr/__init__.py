@@ -9,6 +9,7 @@ from .main import bp as main_bp
 from .users import bp as users_bp
 from .documents import bp as documents_bp
 from .admin import bp as admin_bp
+from .reviews import bp as reviews_bp
 
 from .tasks import scheduler
 
@@ -29,6 +30,7 @@ def create_app(test_config=None):
     app.register_blueprint(users_bp)
     app.register_blueprint(documents_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(reviews_bp)
 
     # start the scheduler so that emails can be sent
     scheduler.start()

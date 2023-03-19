@@ -1,26 +1,48 @@
 {% extends "base.html" %} 
 {% block title %}Home{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documents.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/accounts.css') }}">
+{% endblock %}
+
 {% block content %}
-<h1><b>{{ username }}'s</b> Account</h1>
-<p>{{ access_level }}</p>
-<p>{{ userid }}</p>
-<p>{{ email }}</p>
 
-<div class="account-admin-options">
-    {% if session['access'] >=3 %}
-        <button class="add-page">Restrict</button>
+<div class="container-user-info">
+    <h1><b>{{ username }}'s</b> Account</h1>
+    <p>{{ access_name }}</p>
+    <p>{{ userid }}</p>
+    <p>{{ email }}</p>
 
-        {% if access_level==1 %}
-            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod</button>
-        {% else if access_level==2 %} 
-            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_admin', account_id=userid)}}'">Make Admin</button>
-            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-mod</button>
-        {% else if access_level==3 %} 
-            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod (De-Admin)</button>
-            <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-Admin</button>
-        {% endif %} 
+    <div class="account-admin-options">
+        {% if session['access'] >=3 %}
+            <button class="add-page">Restrict</button>
+    
+            {% if access_level==1 %}
+                <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod</button>
+            {% elif access_level==2 %} 
+                <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_admin', account_id=userid)}}'">Make Admin</button>
+                <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-mod</button>
+            {% elif access_level==3 %} 
+                <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_mod', account_id=userid)}}'">Make Mod (De-Admin)</button>
+                <button class="edit-document" onclick="window.location.href='{{ url_for('users.user_remove_rights', account_id=userid)}}'">De-Admin</button>
+            {% endif %} 
+    
+        {% endif %}
+    </div>
 
-    {% endif %}
 </div>
+
+<div class="container-user-documents">
+    <h2>Recently Published Documents</h2>
+    <div class="documents-grid-container">
+        {% for document in public_documents %}
+        <div class="document">
+            <h3><a href="{{ url_for('documents.document_view', document_id=document[2]) }}"> {{ document[0] }} </a></h2>
+            <p>{{ document[1] }} </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}

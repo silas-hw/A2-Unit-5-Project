@@ -1,0 +1,12 @@
+{% extends "base.html" %} 
+{% block title %}Leave a Review{% endblock %}
+
+{% block content %} 
+<div class="container-review-form">
+    <form class="review-form" action="{{ url_for('reviews.review') }}" method="POST">
+        <h2>Leave a Review!</h2>
+        <input type="number" name="rating" id="rating" min="0" max="5" required>
+        <input type="submit" value="submit">
+    </form>
+</div>
+{% endblock %}

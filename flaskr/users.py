@@ -24,10 +24,14 @@ def account(account_id):
     else:
         userid, username, password, email, newsletters, restricted, banknum, banksort, membership, access_level = res
         cursor = db_conn.execute('SELECT Name FROM AccessLevel WHERE AccessID=?', (access_level,))
-        access_level = cursor.fetchone()[0]
+        access_name = cursor.fetchone()[0]
+
+        # create an sqlite connection and retrieve a list of the currently logged in users documents
+        cursor = db_conn.execute('SELECT DocumentName, Description, DocumentID FROM Document WHERE AccountID=? AND Public=1 LIMIT 3', (session['userid'],))
+        documents = cursor.fetchall()
 
         db_conn.close()
-        return render_template('account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level)
+        return render_template('account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level, access_name=access_name, public_documents=documents)
 
 ######################
 # User Access Levels #
