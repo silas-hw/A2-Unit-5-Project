@@ -6,11 +6,11 @@
 
 {% for doc in recent_docs %} 
 
-<a href="{{ url_for('documents.document_view', document_id=doc['document_id']) }}">
-    <h3>{{ doc['title'] }}</h3>
-    <p>Created by: <i>{{ doc['username'] }}</i></p>
-    <p>{{ doc['description'][0:128] }}...</p>
-</a>
+<div class="container-dashboard-doc">
+    <h3 class="dashboard-document-title"><a class="link-dashboard-doc" href="{{ url_for('documents.document_view', document_id=doc['document_id']) }}">{{ doc['title'] }}</a></h3>
+    <p class="dashboard-user">Created by: <a class='link-dashboard-user' href="{{ url_for('users.account', account_id=doc['account_id']) }}"><i>{{ doc['username'] }}</i></a></p>
+    <p>{{ doc['description'][0:100] }}...</p>
+</div>
 
 {% endfor %}
 {% endblock %}

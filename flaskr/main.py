@@ -48,7 +48,8 @@ def dashboard():
             'username':username,
             'title':doc[0],
             'description':doc[1],
-            'document_id':doc[3]
+            'document_id':doc[3],
+            'account_id':doc[2]
         })
 
     return render_template('dashboard.html', session=session, recent_docs=recent_docs)

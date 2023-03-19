@@ -472,3 +472,34 @@ th {
 
     text-align: left;
 }
+
+/* 
+Dashboard 
+*/
+
+div.container-dashboard-doc {
+    background-color: var(--secondary-background-color);
+    border-radius: var(--main-border-radius);
+
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+h3.dashboard-document-title {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+a.link-dashboard-doc {
+    text-decoration: none;
+}
+
+a.link-dashboard-user {
+    color: rgb(26, 26, 26);
+}
+
+p.dashboard-user {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 0.9em;
+}
