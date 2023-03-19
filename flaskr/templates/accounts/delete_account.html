@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %} 
+
+<form action="{{ url_for('users.delete_account') }}" method="POST">
+    <p>Are you sure you want to delete your account?</p>
+    <input type="submit" value="yes">
+</form>
+
+{% endblock %}

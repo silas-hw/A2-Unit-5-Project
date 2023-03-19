@@ -31,7 +31,7 @@ def account(account_id):
         documents = cursor.fetchall()
 
         db_conn.close()
-        return render_template('account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level, access_name=access_name, public_documents=documents)
+        return render_template('accounts/account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level, access_name=access_name, public_documents=documents)
 
 ######################
 # User Access Levels #
@@ -78,3 +78,57 @@ def user_remove_rights(account_id):
     db_conn.close()
 
     return redirect(url_for('users.account', account_id=account_id))
+
+##################
+# Delete Account #
+##################
+
+@bp.route('/account/delete', methods=['POST', 'GET'])
+@check_loggedin
+def delete_account():
+    if request.method == 'GET':
+        return render_template('accounts/delete_account.html')
+    elif request.method == 'POST':
+        userid = session['userid']
+        db_conn = sqlite3.connect(config.db_dir)
+
+        # delete every database entry associated with the users account id
+        db_conn.execute('DELETE FROM WebsiteRating WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM DocumentLike WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM MembershipPayment WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM Page WHERE PageID=(SELECT PageID FROM Page WHERE DocumentID IN (SELECT DocumentID FROM Document WHERE AccountID=?))', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM Document WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM DocumentShare WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM DocumentComment WHERE CommentID IN (SELECT CommentID FROM Comment WHERE AccountID=?)', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM CommunityPostComment WHERE CommentID IN (SELECT CommentID FROM Comment WHERE AccountID=?)', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM Comment WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM User WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM CommunityPost WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.execute('DELETE FROM CommunityPostLike WHERE AccountID=?', (userid,))
+        db_conn.commit()
+
+        db_conn.close()
+
+        return redirect(url_for('auth.logout'))
