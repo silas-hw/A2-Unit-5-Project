@@ -128,11 +128,13 @@ def edit_account():
 
             newpassword_hash = hashlib.sha256(newpassword.encode('utf-8')).hexdigest() # hash/encrypt the new password with sha256 to hexadecimal
 
-            db_conn.execute('INSERT INTO User (username, email, password, ReceiveNewsletter) VALUES (?, ?, ?, ?)', (username, email, newpassword_hash, newsletter))
+            db_conn.execute('UPDATE User SET username=?, email=?, password=?, ReceiveNewsletter=? WHERE AccountID=?', (username, email, newpassword_hash, newsletter, session['userid']))
             db_conn.commit()
 
             session['username'] = username
             session['email'] = email
+
+            return redirect(url_for('users.account', account_id=session['userid']))
 
         except AssertionError as err:
             return render_template('accounts/edit_account.html', session=session, err_msg=err)
