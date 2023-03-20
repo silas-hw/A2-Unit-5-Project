@@ -29,7 +29,7 @@ def login():
 
         # create an sqlite connection and check if the entered account details exist and match within the database
         db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel FROM User WHERE Email=? AND Password=?', (email, password_hash))
+        cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel, ReceiveNewsletters FROM User WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
 
@@ -37,12 +37,13 @@ def login():
         # 'if res' will return True if res contains any data, which will only be true itself if
         # the username and password combination entered by the user is correct
         if res:
-            account_id, username, access_level = res
+            account_id, username, access_level, newsletters = res
             session['loggedin'] = True
             session['userid'] = account_id
             session['username'] = username
             session['email'] = email
             session['access'] = access_level
+            session['newsletters'] = newsletters
             session['largefont'] = False
 
             return redirect(url_for('main.home'))

@@ -1,0 +1,28 @@
+{% extends "base.html" %} 
+{% block title %}Edit Account Information{% endblock %} 
+
+{% block content %} 
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <p class="error-msg">{{ err_msg }}</p>
+        <form action="{{ url_for('users.edit_account') }}" method='post' class="login-form">
+            <input type="text" name="username" placeholder="Username" value="{{ session['username'] }}" id="username" required>
+            <input type="text" name="email" placeholder="Email" value="{{ session['email'] }}" id="email" required>
+            <input type="password" name="oldpassword" placeholder="Enter old password" id="oldpassword" required>
+            <input type="password" name="newpassword" placeholder="New Password" id="newpassword" required>
+            <input type="password" name="newpassword2" placeholder="Enter New Password again" id="newpassword2" required>
+            <div>
+                {% if session['newsletters']==1 %}
+                    <input type="checkbox" name="newsletter" id="newsletter" value="1" class="newsletter" checked>
+                {% else %}
+                    <input type="checkbox" name="newsletter" id="newsletter" value="1" class="newsletter">
+                {% endif %}
+                <label for="newsletter">newsletters</label>
+            </div>
+            <input type="submit" value="Submit" class="submit">
+        </form>
+    </div>
+</div>
+
+{% endblock %}

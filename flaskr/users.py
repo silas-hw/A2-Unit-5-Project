@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
+import hashlib
 
 # local imports
 from .decorators import *
 from .config import Config as config
+from .algorithms import *
 
 bp = Blueprint('users', __name__)
 
@@ -78,6 +80,63 @@ def user_remove_rights(account_id):
     db_conn.close()
 
     return redirect(url_for('users.account', account_id=account_id))
+
+################
+# Edit Account #
+################
+
+@bp.route('/account/edit/', methods=['POST', 'GET'])
+@check_loggedin
+def edit_account():
+    if request.method=='GET':
+        return render_template('accounts/edit_account.html', session=session)
+    elif request.method=='POST':
+        try:
+            assert 'username' in request.form, 'username must be in form'
+            assert 'email' in request.form, 'email must be in form'
+            assert 'oldpassword' in request.form, 'oldpassword must be in form'
+            assert 'newpassword' in request.form, 'newpassword must be in form'
+            assert 'newpassword2' in request.form, 'newpassword2 must be in form'
+
+            username = request.form['username']
+            email = request.form['email']
+            oldpassword = request.form['oldpassword']
+            newpassword = request.form['newpassword']
+            newpassword2 = request.form['newpassword2']
+            newsletter = 1 if "newsletter" in request.form else 0 
+
+            oldpassword_hash = hashlib.sha256(oldpassword.encode('utf-8')).hexdigest() # hash/encrypt the old password with sha256 to hexadecimal
+
+            db_conn = sqlite3.connect(config.db_dir)
+            cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=? AND Password=?', (session['userid'], oldpassword_hash))
+            res = cursor.fetchone()
+
+            assert res, 'Old Password Incorrect'
+
+            cursor = db_conn.execute('SELECT * FROM User WHERE (username=? OR email=?) AND AccountID!=?', (username, email, session['userid']))
+            res = cursor.fetchall()
+
+            assert len(res)==0, 'Email or Username already in use'
+
+            assert len(username)>3, 'Username is too short'
+            assert check_email(email), 'Invalid email format'
+            assert newpassword!=newpassword.upper(), 'Password must contain a lowercase letter'
+            assert newpassword!=newpassword.lower(), 'Password must contain an uppercase letter'
+            assert any(char.isdigit() for char in newpassword), 'Password must contain a number'
+            assert any(not char.isalnum() and not char==' ' for char in newpassword), 'Password must contain a special character'
+            assert newpassword==newpassword2, 'Passwords do not match'
+
+            newpassword_hash = hashlib.sha256(newpassword.encode('utf-8')).hexdigest() # hash/encrypt the new password with sha256 to hexadecimal
+
+            db_conn.execute('INSERT INTO User (username, email, password, ReceiveNewsletter) VALUES (?, ?, ?, ?)', (username, email, newpassword_hash, newsletter))
+            db_conn.commit()
+
+            session['username'] = username
+            session['email'] = email
+
+        except AssertionError as err:
+            return render_template('accounts/edit_account.html', session=session, err_msg=err)
+
 
 ##################
 # Delete Account #
