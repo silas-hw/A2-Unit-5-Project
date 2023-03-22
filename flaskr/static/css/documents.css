@@ -29,6 +29,19 @@ button.add-document {
     float: right;
 }
 
+button.add-document-disabled {
+    border-radius: var(--main-border-radius);
+    background-color: rgb(112, 231, 112);
+    color: white;
+
+    display: block;
+
+    float: right;
+
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+
 /* 
     page list view
 */

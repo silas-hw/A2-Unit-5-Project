@@ -31,6 +31,10 @@ def my_documents():
     # count how many documents the user has created
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM Document WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
+
+    cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel from User WHERE AccountID=?)', (session['userid'],))
+    doc_limit = int(cursor.fetchone()[0])
+
     db_conn.close()
 
     # filter the document list if a search query has been provided
@@ -42,7 +46,7 @@ def my_documents():
                 temp_docs.append(doc)
         documents=temp_docs
 
-    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, search_query=search_query)
+    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, doc_limit=doc_limit, search_query=search_query)
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin

@@ -8,8 +8,16 @@
 
 {% block content %}
 
+{% if num_docs>=doc_limit %}
+<button class="add-document-disabled" title="Document limit reached" onclick="window.location.href='{{ url_for('documents.add_document') }}'" disabled>Create New Document</button>
+{% else %} 
 <button class="add-document" onclick="window.location.href='{{ url_for('documents.add_document') }}'">Create New Document</button>
+{% endif %}
+
 <h1>You have made <b>{{ num_docs }}</b> documents</h1>
+{% if num_docs>=doc_limit %}
+<p class="error-msg"><i>Warning: you have reached the maximum amount of document for your membership level. Please upgrade to a premium account to create more.</i></p>
+{% endif %}
 
 <form>
     <input id="search" class="search" type="text" value="{{ search_query }}">
