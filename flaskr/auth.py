@@ -16,7 +16,7 @@ bp = Blueprint('auth', __name__)
 @check_loggedout
 def login():
     '''
-    Used for a user to 'log in' to an account they have already created using their
+    Used to allow a user to 'log in' to an account they have already created using their
     email and password.
     '''
 

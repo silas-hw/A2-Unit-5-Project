@@ -38,4 +38,4 @@ def send_email():
 
     
 scheduler = BackgroundScheduler()
-#scheduler.add_job(func=send_email, trigger='interval', minutes=30)
+scheduler.add_job(func=send_email, trigger='interval', minutes=30)
