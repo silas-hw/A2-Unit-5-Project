@@ -29,7 +29,7 @@ def login():
 
         # create an sqlite connection and check if the entered account details exist and match within the database
         db_conn = sqlite3.connect(config.db_dir)
-        cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel, ReceiveNewsletters FROM User WHERE Email=? AND Password=?', (email, password_hash))
+        cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel, ReceiveNewsletter FROM User WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
 
