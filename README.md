@@ -1,5 +1,7 @@
 # A2 Computer Science Project
 
+> Note: this file is written in markdown. A better viewing experience can be had by using a markdown viewer.
+
 ## Running
 
 To run this website, you need to install the required modules and software and then either attach the program to
@@ -10,6 +12,8 @@ It is likely you're using Windows to assess this project, although alternative i
 that you follow these instructions in a virtual environment (e.g. Pyenv), although I will not provide instructions on how to do so. This project relies on the correct
 versions of modules and interpreters to be used, which the use of a virtual environment ensures. If you choose to continue without a virtual environment, I can
 not promise that the system will work the same for you as it does for me.
+
+### Steps
 
 #### Step 1: Install Python
 
@@ -51,10 +55,10 @@ Run the following command in the same command prompt to start the application
 flask run
 ```
 
-The website should now be accessible at http://localhost:5000 or http://127.0.0.1:5000
+The website should now be accessible at [http://localhost:5000](http://localhost:5000) or [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## Test Account Details
 
-Username: Test1
-E-mail: test@test.com
-Password: Password123
+Username: Jeff
+E-mail: jeff@gmail.com
+Password: TestPass12!
