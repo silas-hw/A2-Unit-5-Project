@@ -232,6 +232,8 @@ div.reviews > div.review > div.review-score {
 div.navbar {
     background-color: var(--navbar-color);
     height: 60px;
+    top: 0;
+    width: 100%;
 }
 
 div.navbar > div {
@@ -295,13 +297,14 @@ div.content {
 /* sidebar */
 
 div.sidebar {
-    position: fixed;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0px;
 
     float: left;
     padding-top: 30px;
-
-    height: 100%;
     width: 200px;
+    height: 97vh;
     
     background-color: var(--secondary-background-color);
 

@@ -3,8 +3,8 @@ domain = 'http://localhost:5000/'
 
 accounts = {
     '1':{
-        'email':'test@test.com',
-        'pass':'Password123'
+        'email':'jeff@gmail.com',
+        'pass':'TestPass12!'
     },
     '2':{
         'email':'test2@test.com',
@@ -126,7 +126,22 @@ def edit_newsletter3():
     
     requests.post(domain+'logout/')
 
+def edit_newsletter4():
+    url = domain+'login/'
+    data = accounts['1']
+    requests.post(url, json=data)
+
+    url = domain+'admin/newsletter/edit/99'
+    data = {
+        'subject':'Welcome',
+        'content':'Hmph this newsletter should not exist',
+        'send_date':'2024-04-92'
+    }
+    requests.post(url, json=data)
+    
+    requests.post(domain+'logout/')
+
 
 if __name__ == '__main__':
-    edit_newsletter3()
+    edit_newsletter4()
     
