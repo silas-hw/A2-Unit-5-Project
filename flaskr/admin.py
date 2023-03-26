@@ -1,7 +1,5 @@
-from ast import Assert
-from flask import Blueprint, render_template, request, session, redirect, url_for, current_app, jsonify
+from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 import sqlite3
-import hashlib
 import time
 import datetime
 
@@ -111,7 +109,7 @@ def database_fieldnames():
     table_headers = [header[1] for header in table_headers]
     db_conn.close()
 
-    return jsonify(table_headers)
+    return jsonify(table_headers) # jsonify returns the data in the json format which is required by javascript
 
 ###############
 # NEWSLETTERS #
@@ -125,6 +123,7 @@ def newsletters():
     Returns a list of newsletters in order of their NewsletterID. 
     '''
 
+    # Retrieve all the newsletters
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT * FROM Newsletter')
     newsletter_list = cursor.fetchall()
@@ -183,6 +182,7 @@ def create_newsletter():
             return redirect(url_for('admin.newsletters'))
 
     except AssertionError as err:
+        # return the newsletter edit page with an error message is validation fails
         err_msg = err
         return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
         
@@ -275,6 +275,7 @@ def delete_newsletter(newsletter_id):
     cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
     res = cursor.fetchone()
     
+    # if the newsletter doesn't exit then redirect the user
     if not res:
         db_conn.close()
         return redirect(url_for('admin.newsletters'))

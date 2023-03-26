@@ -15,6 +15,7 @@ def home():
     '''
     returns the homepage to users who are not logged in and redirects logged in users to their dashboard
     '''
+
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
     ratings_temp=cursor.fetchall()
@@ -39,6 +40,8 @@ def dashboard():
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM Document WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
     res = cursor.fetchall()
+
+    # convert the retrieved data into a format accessible by dictionary indexing, attaching the document creators username as well
     recent_docs=[]
     for doc in res:
         cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (doc[2],))

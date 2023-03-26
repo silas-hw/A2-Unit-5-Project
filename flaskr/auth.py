@@ -1,9 +1,6 @@
-from ast import Assert
-from os import access
-from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, session, redirect, url_for
 import sqlite3
 import hashlib
-import time
 
 # local imports
 from .decorators import *

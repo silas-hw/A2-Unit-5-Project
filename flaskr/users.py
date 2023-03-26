@@ -92,12 +92,14 @@ def edit_account():
         return render_template('accounts/edit_account.html', session=session)
     elif request.method=='POST':
         try:
+            # perform data validation to ensure that all the required data is provided in the form
             assert 'username' in request.form, 'username must be in form'
             assert 'email' in request.form, 'email must be in form'
             assert 'oldpassword' in request.form, 'oldpassword must be in form'
             assert 'newpassword' in request.form, 'newpassword must be in form'
             assert 'newpassword2' in request.form, 'newpassword2 must be in form'
 
+            # assign the provided data to variables
             username = request.form['username']
             email = request.form['email']
             oldpassword = request.form['oldpassword']
@@ -107,6 +109,7 @@ def edit_account():
 
             oldpassword_hash = hashlib.sha256(oldpassword.encode('utf-8')).hexdigest() # hash/encrypt the old password with sha256 to hexadecimal
 
+            # data validation
             db_conn = sqlite3.connect(config.db_dir)
             cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=? AND Password=?', (session['userid'], oldpassword_hash))
             res = cursor.fetchone()
@@ -128,9 +131,11 @@ def edit_account():
 
             newpassword_hash = hashlib.sha256(newpassword.encode('utf-8')).hexdigest() # hash/encrypt the new password with sha256 to hexadecimal
 
+            # update the information stored about the user in the database to match the data provided
             db_conn.execute('UPDATE User SET username=?, email=?, password=?, ReceiveNewsletter=? WHERE AccountID=?', (username, email, newpassword_hash, newsletter, session['userid']))
             db_conn.commit()
 
+            # update the session to match the users new credentials
             session['username'] = username
             session['email'] = email
 

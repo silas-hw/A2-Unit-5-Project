@@ -1,6 +1,6 @@
 # Note: for an understanding of how the terms 'document' and 'page' relate to each other in this context refer to the design document
 
-from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, session, redirect, url_for
 import sqlite3
 import markdown
 import time
@@ -32,6 +32,7 @@ def my_documents():
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM Document WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
 
+    # retrieve the document limit based on the users current membership level
     cursor = db_conn.execute('SELECT DocumentLimit FROM MembershipLevel WHERE MembershipLevel=(SELECT MembershipLevel from User WHERE AccountID=?)', (session['userid'],))
     doc_limit = int(cursor.fetchone()[0])
 
@@ -68,6 +69,7 @@ def document_view(document_id):
     account_id, public, title, description, restricted = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
+    # if the document is private or restricted and the user doesn't own the document, or the user is not a moderator, then return an error message
     if (public==False or restricted) and not document_owner and session['access']==1:
         db_conn.close()
         return 'the document you attempted to view is private or restricted by a moderator'
@@ -140,6 +142,7 @@ def edit_document(document_id):
     '''
     db_conn = sqlite3.connect(config.db_dir)
 
+    # check if the current users owns the document, redirecting them if they do not
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
 
@@ -160,6 +163,7 @@ def edit_document(document_id):
             db_conn.close()
             return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
         elif request.method=='POST':
+            # retrieve all the data provided in the form
             document_name = request.form['title']
             document_description = request.form['description']
             document_public = 1 if 'public' in request.form else 0
@@ -167,6 +171,7 @@ def edit_document(document_id):
             # data validation
             assert len(document_name)>=1, 'Document name cannot be empty'
 
+            # Update the data stored in the database about the provided document
             cursor = db_conn.execute('UPDATE Document SET DocumentName=?, Description=?, Public=? WHERE DocumentID=?', (document_name, document_description, document_public, document_id))
             db_conn.commit()
             db_conn.close()
@@ -185,6 +190,7 @@ def delete_document(document_id):
     Used to delete a document and its associated pages
     '''
     
+    # check if the user owns the document, redirecting them if they do not
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     doc_account_id = cursor.fetchone()[0]
@@ -206,8 +212,10 @@ def delete_document(document_id):
 @check_moderator
 def private_document(document_id):
     '''
-    Allows a document to be privated by its owner or a moderator
+    Allows a document to be made private by a moderator
     '''
+
+    # update a document to change its Public field to False 
     db_conn = sqlite3.connect(config.db_dir)
     db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
@@ -244,9 +252,9 @@ def unrestrict_document(document_id):
 
     return redirect(url_for('main.dashboard'))
 
-#############
-# PAGES     #
-#############
+##########
+# PAGES  #
+##########
 
 @bp.route('/page/view/<page_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -256,14 +264,17 @@ def page_view(page_id):
     a publically shared document
     '''
 
+    # retrieve data relating to the document that the page belongs to
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, public FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     res = cursor.fetchone()
 
+    # the page doesn't exist then redirect the user
     if not res:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
+    # check if the user should have access to the document the page belongs to, redirecting them if they do not
     account_id, public = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
 
@@ -271,10 +282,12 @@ def page_view(page_id):
         db_conn.close()
         return 'the document you attempted to view is private'
 
+    # retrieve the content of the page from the database
     cursor = db_conn.execute('SELECT content FROM Page WHERE PageID=?', (page_id,))
     md_content = cursor.fetchone()[0]
     db_conn.close()
     
+    # render the markdown text into HTML
     html_content = markdown.markdown(md_content, extensions=['fenced_code', 'tables'])
     
     return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
@@ -286,6 +299,7 @@ def add_page(document_id):
     Used when a user decides to add a page to one of their documents
     '''
 
+    # check if the user owns the document the page belongs to, returning an error message if they do not
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
@@ -300,11 +314,14 @@ def add_page(document_id):
             return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
 
         elif request.method=='POST':
+            # retrieve data provided in the form
             title = request.form['title']
             content = request.form['content']
 
+            # data validation
             assert len(title)>=1, 'Page title cannot be empty'
 
+            # add a new entry to the database containing the provided data
             cursor = db_conn.execute('INSERT INTO Page (Name, Content, DocumentID) VALUES (?, ?, ?)', (title, content, document_id))
             db_conn.commit()
             db_conn.close()
@@ -323,11 +340,12 @@ def edit_page(page_id):
     Allows the user to edit the content of a page within one of their own documents
     '''
     
+    # retrieve data relating to the document the page belongs to and the page itself
     db_conn = sqlite3.connect(config.db_dir)
-    # need to add document id here
     cursor = db_conn.execute('SELECT Document.AccountID, Page.DocumentID, Page.Name, Page.Content FROM Page INNER JOIN Document ON Page.DocumentID=Document.DocumentID WHERE PageID=? ', (page_id,))
     account_id, document_id, page_title, page_content = cursor.fetchone()
 
+    # return an error message if the user doesn't own the document the page belongs to
     if session['userid']!=account_id:
         db_conn.close()
         return 'You do not own the document this page is attached to'
@@ -337,11 +355,14 @@ def edit_page(page_id):
             db_conn.close()
             return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit')
         elif request.method=='POST':
+            # retrieve data provided in the form
             title = request.form['title']
             content = request.form['content']
 
+            # data validation
             assert len(title)>=1, 'Page title cannot be empty'
 
+            # update the data stored in the database about the page ID provided
             cursor = db_conn.execute('UPDATE Page SET Name=?, Content=? WHERE PageID=?', (title, content, page_id))
             db_conn.commit()
             db_conn.close()
@@ -360,18 +381,22 @@ def delete_page(page_id):
     Used to delete a document and its associated pages
     '''
     
+    # retrieve data relating to the document that the page belongs to
     db_conn = sqlite3.connect(config.db_dir)
     cursor = db_conn.execute('SELECT AccountID, DocumentID FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     page_account_id, document_id = cursor.fetchone()
 
+    # if the page doesn't exist, redirect the user
     if not document_id:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
+    # if the user doesn't own the document, redirect the user
     if session['userid'] != page_account_id:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
+    # delete the entry in the database belonging to the page ID provided
     cursor = db_conn.execute('DELETE FROM Page WHERE PageID=?', (page_id,))
     db_conn.commit()
     db_conn.close()
@@ -386,10 +411,11 @@ def delete_page(page_id):
 @check_loggedin
 def comment_list(type):
 
+    # liking is done by JavaScript, so request data is given in the json format
     request_data = request.get_json()
 
     db_conn = sqlite3.connect(config.db_dir)
-    offset = int(request_data['offset'])*config.num_comments
+    offset = int(request_data['offset'])*config.num_comments # determines how far into the table comments should be retrieved from
 
     # retrieve data from the corresponding table depending on whether comments for a document or comments for a community post are being retrieved
     if type=='document':
@@ -399,13 +425,15 @@ def comment_list(type):
         post_id = request_data['post_id']
         cursor = db_conn.execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
 
-    comment_ids=[id[0] for id in cursor.fetchall()]
+    comment_ids=[id[0] for id in cursor.fetchall()] # create a table of comment IDs from the comments retrieved
 
+    # generate an SQL statement to retrieve all the comments associated with a document or post
     statement = f'SELECT * FROM Comment WHERE CommentID IN ({sql_prepared_tuple(len(comment_ids))}) ORDER BY DateEpoch DESC'
 
     cursor = db_conn.execute(statement, comment_ids)
     comments = cursor.fetchall()
 
+    # convert the Unix timestamp for each comment into a human-readable date format
     comment_list = []
     for comment in comments:
         comment_id, account_id, content, dateepoch = comment
@@ -428,6 +456,7 @@ def like_document(document_id):
 
     db_conn = sqlite3.connect(config.db_dir)
 
+    # if the document doesn't exist then redirect the user
     cursor = db_conn.execute('SEleCT * FROM Document WHERE DocumentID=?', (document_id))
     if not cursor.fetchone():
         db_conn.close()
@@ -445,11 +474,13 @@ def like_document(document_id):
 
     db_conn.commit()
 
+    # count how many likes the document associated with the given Document ID has
     cursor = db_conn.execute('SELECT COUNT(AccountID) FROM DocumentLike WHERE DocumentID=?', (document_id,))
     num_likes = cursor.fetchone()[0]
 
     db_conn.close()
-
+    
+    # return the number of likes so that the screen can be updated on the client end
     return str(num_likes), 202
 
 @bp.route('/document/comment/<document_id>/', methods=['POST'])
@@ -460,28 +491,38 @@ def comment_document(document_id):
     '''
     db_conn = sqlite3.connect(config.db_dir)
 
+    # if the document doesn't exist then redirect the user
     cursor = db_conn.execute('SElECT AccountID, Public FROM Document WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
     if not res:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
-    owner_id, public = res
+    owner_id, public = res # unpack the retrieve data
+
+    # if the user doesn't have access to the document then redirect them
     if session['userid']!=owner_id and public==0:
         db_conn.close()
         return redirect(url_for('main.dashboard'))
 
+    # retrieve the data provided in the form
     content = request.form['content']
-    if len(content)==0:
+
+    try:
+        assert len(content)>=0
+    except AssertionError:
         redirect(url_for('documents.document_view', document_id=document_id)), 304
     
+    # insert a new field into the database with the provided data
     dateepoch = int(time.time())
     cursor = db_conn.execute('INSERT INTO Comment (AccountID, Content, DateEpoch) VALUES (?, ?, ?)', (session['userid'], content, dateepoch))
     db_conn.commit()
 
+    # get the comment ID of the new comment
     cursor = db_conn.execute('SELECT CommentID FROM Comment WHERE AccountID=? AND Content=? AND DateEpoch=?', (session['userid'], content, dateepoch))
     comment_id = cursor.fetchone()[0]
 
+    # make a new entry in the DocumentComment table linking the document and the new comment
     cursor = db_conn.execute('INSERT INTO DocumentComment (CommentID, DocumentID) VALUES (?, ?)', (comment_id, document_id))
     db_conn.commit()
     db_conn.close()
@@ -501,10 +542,12 @@ def delete_comment(comment_id):
         cursor = db_conn.execute('SELECT AccountID FROM Comment WHERE CommentID=?', (comment_id,))
         owner_id = cursor.fetchone()[0]
 
+        # if the user does not own the document, redirect them
         if session['userid'] != owner_id:
             db_conn.close()
             return redirect(url_for('documents.document_view', document_id=document_id))
     
+    # delete the comment from the DocumentComment link table and the Comment table
     db_conn.execute('DELETE FROM DocumentComment WHERE CommentID=?', (comment_id,))
     db_conn.commit()
     db_conn.execute('DELETE FROM Comment WHERE CommentID=?', (comment_id))

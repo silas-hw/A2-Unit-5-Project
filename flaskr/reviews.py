@@ -22,15 +22,16 @@ def review():
         db_conn.close()
         return render_template('review.html', session=session, user_rating=user_rating)
     elif request.method == 'POST':
-        # insert a new rating into the WebsiteRating table if the user has not already submitted one, 
-        # or update the users existing rating if they have
+        # set a boolean to if the user has currently created a rating or not
         rating_present = True if user_rating != '' else False
         user_rating = request.form['rating']
 
+        # update the rating stored in the WebsiteRating table is the user has already created one
         if rating_present:
             db_conn.execute('UPDATE WebsiteRating SET Rating=? WHERE AccountID=?', (user_rating, session['userid']))
             db_conn.commit()
 
+        # create a new entry in the WebsiteRating tablei if the user has already created a rating
         else:
             db_conn.execute('INSERT INTO WebsiteRating (AccountID, Rating) VALUES (?, ?)', (session['userid'], user_rating))
             db_conn.commit()
