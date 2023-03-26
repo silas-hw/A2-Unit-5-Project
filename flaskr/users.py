@@ -17,12 +17,12 @@ def account(account_id):
     '''
 
     db_conn = sqlite3.connect(config.db_dir)
-    cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id))
+    cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id,))
     res = cursor.fetchone()
     
     if not res:
         db_conn.close()
-        return redirect(url_for('main.home'))
+        return render_template('errors/error_base.html', error_title='404', error_message="Hmm, it seems like that person doesn't exist...")
     else:
         userid, username, password, email, newsletters, restricted, banknum, banksort, membership, access_level = res
         cursor = db_conn.execute('SELECT Name FROM AccessLevel WHERE AccessID=?', (access_level,))

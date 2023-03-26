@@ -1,6 +1,6 @@
 # Note: for an understanding of how the terms 'document' and 'page' relate to each other in this context refer to the design document
 
-from flask import Blueprint, render_template, request, session, redirect, url_for
+from flask import Blueprint, render_template, request, session, redirect, url_for, abort
 import sqlite3
 import markdown
 import time
@@ -64,7 +64,7 @@ def document_view(document_id):
     # if the document doesn't exist, return user to dashboard
     if not res:
         db_conn.close()
-        return redirect(url_for('main.dashboard'))
+        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist'), 404
 
     account_id, public, title, description, restricted = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
@@ -72,7 +72,7 @@ def document_view(document_id):
     # if the document is private or restricted and the user doesn't own the document, or the user is not a moderator, then return an error message
     if (public==False or restricted) and not document_owner and session['access']==1:
         db_conn.close()
-        return 'the document you attempted to view is private or restricted by a moderator'
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message='The document is either private or restricted by a moderator'), 403
 
     cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
@@ -148,12 +148,12 @@ def edit_document(document_id):
 
     if session['userid'] != account_id:
         db_conn.close()
-        return redirect(url_for('documents.my_documents'))
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="It doesn't seem like you have access to that document"), 403
 
     cursor = db_conn.execute('SELECT * FROM Document WHERE DocumentID=?', (document_id,))
     if not cursor.fetchone():
         db_conn.close()
-        return redirect(url_for('documents.my_documents'))
+        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist'), 404
     
     cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
     title, description = cursor.fetchone()
@@ -272,7 +272,7 @@ def page_view(page_id):
     # the page doesn't exist then redirect the user
     if not res:
         db_conn.close()
-        return redirect(url_for('main.dashboard'))
+        return render_template('errors/error_base', error_title='404', error_message="That page doesn't exist"), 404
 
     # check if the user should have access to the document the page belongs to, redirecting them if they do not
     account_id, public = res
@@ -280,7 +280,7 @@ def page_view(page_id):
 
     if public==False and not document_owner:
         db_conn.close()
-        return 'the document you attempted to view is private'
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document"), 403
 
     # retrieve the content of the page from the database
     cursor = db_conn.execute('SELECT content FROM Page WHERE PageID=?', (page_id,))
@@ -348,7 +348,7 @@ def edit_page(page_id):
     # return an error message if the user doesn't own the document the page belongs to
     if session['userid']!=account_id:
         db_conn.close()
-        return 'You do not own the document this page is attached to'
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document"), 403
     
     try:
         if request.method=='GET':
@@ -460,7 +460,7 @@ def like_document(document_id):
     cursor = db_conn.execute('SEleCT * FROM Document WHERE DocumentID=?', (document_id))
     if not cursor.fetchone():
         db_conn.close()
-        return redirect(url_for('main.dashboard'))
+        return render_template('errors/error_base.html', error_title='404', error_message="Hmph... that document doesn't exist"), 403
 
     cursor = db_conn.execute('SElECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
     res = cursor.fetchone()
@@ -496,7 +496,7 @@ def comment_document(document_id):
     res = cursor.fetchone()
     if not res:
         db_conn.close()
-        return redirect(url_for('main.dashboard'))
+        return render_template('errors/error_base.html', error_title='404', error_message="Uh oh... that document doesn't seem to exist"), 403
 
     owner_id, public = res # unpack the retrieve data
 
@@ -507,11 +507,10 @@ def comment_document(document_id):
 
     # retrieve the data provided in the form
     content = request.form['content']
-
     try:
-        assert len(content)>=0
+        assert content in request.form, 'comment body must be provided'
     except AssertionError:
-        redirect(url_for('documents.document_view', document_id=document_id)), 304
+        return redirect(url_for('documents.document_view', document_id=document_id), 304)
     
     # insert a new field into the database with the provided data
     dateepoch = int(time.time())
@@ -545,7 +544,7 @@ def delete_comment(comment_id):
         # if the user does not own the document, redirect them
         if session['userid'] != owner_id:
             db_conn.close()
-            return redirect(url_for('documents.document_view', document_id=document_id))
+            return redirect(url_for('documents.document_view', document_id=document_id), 304)
     
     # delete the comment from the DocumentComment link table and the Comment table
     db_conn.execute('DELETE FROM DocumentComment WHERE CommentID=?', (comment_id,))

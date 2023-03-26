@@ -32,8 +32,14 @@ def create_app(test_config=None):
     app.register_blueprint(admin_bp)
     app.register_blueprint(reviews_bp)
 
+    # register error handlers
+    app.register_error_handler(404, page_not_found)
+
     # start the scheduler so that emails can be sent
     scheduler.start()
     atexit.register(scheduler.shutdown) # stops the scheduler when the program closes (i.e. when the server stops running)
 
     return app
+
+def page_not_found(e):
+    return render_template('errors/error_base.html', error_title='404', error_message="Sorry mate, that URL isn't correct")

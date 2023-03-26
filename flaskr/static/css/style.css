@@ -503,3 +503,33 @@ p.dashboard-user {
     margin-bottom: 0px;
     font-size: 0.9em;
 }
+
+/* 
+error pages
+*/
+
+div.error-container {
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+}
+
+div.error-wrapper {
+    margin: auto;
+    margin-top: 25vh;
+    text-align: center;
+}
+
+div.error-wrapper > h1 {
+    font-size: 5em;
+    margin-bottom: 0px;
+
+    text-shadow: 3px 3px gray;
+}
+
+div.error-wrapper > p {
+    margin-top: 0px;
+    font-weight: 200;
+    font-style: italic;
+    opacity: 60%;
+}
