@@ -34,6 +34,9 @@ def create_app(test_config=None):
 
     # register error handlers
     app.register_error_handler(404, page_not_found)
+    app.register_error_handler(500, server_error)
+    app.register_error_handler(502, bad_gateway)
+    app.register_error_handler(503, service_unavailable)
 
     # start the scheduler so that emails can be sent
     scheduler.start()
@@ -43,3 +46,13 @@ def create_app(test_config=None):
 
 def page_not_found(e):
     return render_template('errors/error_base.html', error_title='404', error_message="Sorry mate, that URL isn't correct")
+
+def server_error(e):
+    return render_template('errors/error_base.html', error_title='500', error_message="Oops... the server ran into a problem")
+
+def bad_gateway(e):
+    return render_template('errors/error_base.html', error_title='502', error_message='Error: bad gateway')
+
+def service_unavailable(e):
+    return render_template('errors/error_base.html', error_title="503", error_message=":/ Service Unavailable. The server was not able to handle your request; It may be overloaded or down for maintenance.")
+
