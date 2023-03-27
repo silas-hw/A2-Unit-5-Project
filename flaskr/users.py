@@ -30,7 +30,7 @@ def account(account_id):
         access_name = cursor.fetchone()[0]
 
         # create an sqlite connection and retrieve a list of the currently logged in users documents
-        cursor = db_conn.execute('SELECT DocumentName, Description, DocumentID FROM Document WHERE AccountID=? AND Public=1 LIMIT 3', (session['userid'],))
+        cursor = db_conn.execute('SELECT DocumentName, Description, DocumentID FROM Document WHERE AccountID=? AND Public=1 LIMIT 3', (account_id,))
         documents = cursor.fetchall()
 
         db_conn.close()

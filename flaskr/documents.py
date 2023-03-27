@@ -272,7 +272,7 @@ def page_view(page_id):
     # the page doesn't exist then redirect the user
     if not res:
         db_conn.close()
-        return render_template('errors/error_base', error_title='404', error_message="That page doesn't exist"), 404
+        return render_template('errors/error_base.html', error_title='404', error_message="That page doesn't exist"), 404
 
     # check if the user should have access to the document the page belongs to, redirecting them if they do not
     account_id, public = res
@@ -457,12 +457,12 @@ def like_document(document_id):
     db_conn = sqlite3.connect(config.db_dir)
 
     # if the document doesn't exist then redirect the user
-    cursor = db_conn.execute('SEleCT * FROM Document WHERE DocumentID=?', (document_id))
+    cursor = db_conn.execute('SElECT * FROM Document WHERE DocumentID=?', (document_id,))
     if not cursor.fetchone():
         db_conn.close()
         return render_template('errors/error_base.html', error_title='404', error_message="Hmph... that document doesn't exist"), 403
 
-    cursor = db_conn.execute('SElECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
+    cursor = db_conn.execute('SELECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
     res = cursor.fetchone()
 
     # if a like by a user already exists for the document, delete the corresponding entry in the DocumnetLike table (i.e. unlike)
@@ -508,7 +508,7 @@ def comment_document(document_id):
     # retrieve the data provided in the form
     content = request.form['content']
     try:
-        assert content in request.form, 'comment body must be provided'
+        assert content, 'comment body must be provided'
     except AssertionError:
         return redirect(url_for('documents.document_view', document_id=document_id), 304)
     
