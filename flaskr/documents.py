@@ -105,7 +105,7 @@ def add_document():
     # if doc_limit is less than 1, then it means that the users membership level has unlimited documents
     if doc_limit>0:
         # redirect the user to the my documents page if they have surpassed their document limit
-        if num_docs == doc_limit:
+        if num_docs >= doc_limit:
             db_conn.close()
             return redirect(url_for('documents.my_documents'))
 
