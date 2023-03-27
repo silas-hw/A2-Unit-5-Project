@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import sqlite3
 import hashlib
+import time
 
 # local imports
 from .decorators import *
@@ -144,6 +145,40 @@ def edit_account():
         except AssertionError as err:
             return render_template('accounts/edit_account.html', session=session, err_msg=err)
 
+##############
+# Membership #
+##############
+
+@bp.route('/membership/', methods=['POST', 'GET'])
+@check_loggedin
+def membership():
+    if request.method=='GET':
+        return render_template('accounts/membership.html')
+    elif request.method=='POST':
+        db_conn = sqlite3.connect(config.db_dir)
+        action = request.form['action'] # whether the user is subscring or unsubscribing
+
+        cursor = db_conn.execute('SELECT MembershipLevel FROM User WHERE AccountID=?', (session['userid'],))
+        current_membership = int(cursor.fetchone()[0])
+
+        if action=='subscribe' and current_membership==1:
+            db_conn.execute('UPDATE User SET MembershipLevel=2 WHERE AccountID=?', (session['userid'],))
+            db_conn.commit()
+
+            date_started = int(time.time())
+            db_conn.execute('INSERT INTO MembershipPayment (AccountID, DateStartedEpoch, LastPaymentEpoch) VALUES (?, ?, ?)', (session['userid'], date_started, date_started))
+            db_conn.commit()
+
+        elif action=='unsubscribe':
+            db_conn.execute('DELETE FROM MembershipPayment WHERE AccountID=?', (session['userid'],))
+            db_conn.commit()
+
+            db_conn.execute('UPDATE User SET MembershipLevel=1 WHERE AccountID=?', (session['userid'],))
+            db_conn.commit()
+
+        db_conn.close()
+
+        return redirect(url_for('main.dashboard'))
 
 ##################
 # Delete Account #

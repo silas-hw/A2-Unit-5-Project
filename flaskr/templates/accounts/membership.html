@@ -1,0 +1,13 @@
+{% extends "base.html" %} 
+{% block title %}Membership{% endblock %}
+
+{% block content %} 
+<form action="{{ url_for('users.membership') }}" method="post">
+    <p>would you like to subscribe or unsubscribe to a premium membership?</p>
+    <select name="action" id="action">
+        <option value="subscribe">subscribe</option>
+        <option value="unsubscribe">unsubscribe</option>
+    </select>
+    <input type="submit" value="submit">
+</form>
+{% endblock %}
