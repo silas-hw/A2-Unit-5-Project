@@ -47,7 +47,7 @@ def my_documents():
                 temp_docs.append(doc)
         documents=temp_docs
 
-    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, doc_limit=doc_limit, search_query=search_query)
+    return render_template('/documents/mydocuments.html', documents=documents, num_docs=num_docs, doc_limit=doc_limit, search_query=search_query, session=session)
 
 @bp.route('/document/view/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -64,7 +64,7 @@ def document_view(document_id):
     # if the document doesn't exist, return user to dashboard
     if not res:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist'), 404
+        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist', session=session), 404
 
     account_id, public, title, description, restricted = res
     document_owner = True if 'userid' in session and session['userid']==account_id else False
@@ -72,7 +72,7 @@ def document_view(document_id):
     # if the document is private or restricted and the user doesn't own the document, or the user is not a moderator, then return an error message
     if (public==False or restricted) and not document_owner and session['access']==1:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message='The document is either private or restricted by a moderator'), 403
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message='The document is either private or restricted by a moderator', session=session), 403
 
     cursor = db_conn.execute('SELECT PageID, Name FROM Page WHERE DocumentID=?', (document_id,))
     pages = cursor.fetchall()
@@ -112,7 +112,7 @@ def add_document():
     try:
         if request.method=='GET':
             db_conn.close()
-            return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="")
+            return render_template('/documents/editdocument.html', action='add', doc_title="", doc_description="", session=session)
         
         elif request.method=='POST':
             # insert the data provided in the post request into the document table
@@ -132,7 +132,7 @@ def add_document():
         db_conn.close()
 
         err_msg = err
-        return render_template('/documents/editdocument.html', action='add', doc_title='', doc_description='', err_msg=err_msg)
+        return render_template('/documents/editdocument.html', action='add', doc_title='', doc_description='', err_msg=err_msg, session=session)
 
 @bp.route('/document/edit/<document_id>', methods=['GET', 'POST'])
 @check_loggedin
@@ -148,12 +148,12 @@ def edit_document(document_id):
 
     if session['userid'] != account_id:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="It doesn't seem like you have access to that document"), 403
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="It doesn't seem like you have access to that document", session=session), 403
 
     cursor = db_conn.execute('SELECT * FROM Document WHERE DocumentID=?', (document_id,))
     if not cursor.fetchone():
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist'), 404
+        return render_template('errors/error_base.html', error_title='404', error_message='Document does not exist', session=session), 404
     
     cursor = db_conn.execute('SELECT DocumentName, Description FROM Document WHERE DocumentID=?', (document_id,))
     title, description = cursor.fetchone()
@@ -161,7 +161,7 @@ def edit_document(document_id):
     try:
         if request.method=='GET':
             db_conn.close()
-            return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description)
+            return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description, session=session)
         elif request.method=='POST':
             # retrieve all the data provided in the form
             document_name = request.form['title']
@@ -181,7 +181,7 @@ def edit_document(document_id):
         db_conn.close()
 
         err_msg = err
-        return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description, err_msg=err_msg)
+        return render_template('/documents/editdocument.html', action='edit', document_id=document_id, doc_title=title, doc_description=description, err_msg=err_msg, session=session)
 
 @bp.route('/document/delete/<document_id>/', methods=['GET'])
 @check_loggedin
@@ -272,7 +272,7 @@ def page_view(page_id):
     # the page doesn't exist then redirect the user
     if not res:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message="That page doesn't exist"), 404
+        return render_template('errors/error_base.html', error_title='404', error_message="That page doesn't exist", session=session), 404
 
     # check if the user should have access to the document the page belongs to, redirecting them if they do not
     account_id, public = res
@@ -280,7 +280,7 @@ def page_view(page_id):
 
     if public==False and not document_owner:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document"), 403
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document", session=session), 403
 
     # retrieve the content of the page from the database
     cursor = db_conn.execute('SELECT content FROM Page WHERE PageID=?', (page_id,))
@@ -290,7 +290,7 @@ def page_view(page_id):
     # render the markdown text into HTML
     html_content = markdown.markdown(md_content, extensions=['fenced_code', 'tables'])
     
-    return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id)
+    return render_template('/documents/pageview.html', html_content=html_content, document_owner=document_owner, page_id=page_id, session=session)
 
 @bp.route('/page/add/<document_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -311,7 +311,7 @@ def add_page(document_id):
     try:
         if request.method=='GET':
             db_conn.close()
-            return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add')
+            return render_template('/documents/editpage.html', document_id=document_id, page_content='', page_title='', action='add', session=session)
 
         elif request.method=='POST':
             # retrieve data provided in the form
@@ -331,7 +331,7 @@ def add_page(document_id):
         db_conn.close()
 
         err_msg = err()
-        return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add', err_msg=err_msg)
+        return render_template('/documents/editpage.html', document_id=document_id, page_content=request.form['content'], page_title='', action='add', err_msg=err_msg, session=session)
 
 @bp.route('/page/edit/<page_id>/', methods=['GET', 'POST'])
 @check_loggedin
@@ -348,12 +348,12 @@ def edit_page(page_id):
     # return an error message if the user doesn't own the document the page belongs to
     if session['userid']!=account_id:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document"), 403
+        return render_template('errors/error_base.html', error_title='403: Forbidden', error_message="Uh oh... you don't have access to that document", session=session), 403
     
     try:
         if request.method=='GET':
             db_conn.close()
-            return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit')
+            return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', session=session)
         elif request.method=='POST':
             # retrieve data provided in the form
             title = request.form['title']
@@ -372,7 +372,7 @@ def edit_page(page_id):
         db_conn.close()
 
         err_msg = err
-        return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', err_msg=err_msg)
+        return render_template('/documents/editpage.html', page_id=page_id, page_content=page_content, page_title=page_title, action='edit', err_msg=err_msg, session=session)
 
 @bp.route('/page/delete/<page_id>/', methods=['GET'])
 @check_loggedin
@@ -445,7 +445,7 @@ def comment_list(type):
 
         comment_list.append((comment_id, account_id, username, content, date))
 
-    return render_template('/documents/commentlist.html', comments=comment_list)
+    return render_template('/documents/commentlist.html', comments=comment_list, session=session)
 
 @bp.route('/document/like/<document_id>', methods=['POST'])
 @check_loggedin
@@ -460,7 +460,7 @@ def like_document(document_id):
     cursor = db_conn.execute('SElECT * FROM Document WHERE DocumentID=?', (document_id,))
     if not cursor.fetchone():
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message="Hmph... that document doesn't exist"), 403
+        return render_template('errors/error_base.html', error_title='404', error_message="Hmph... that document doesn't exist", session=session), 403
 
     cursor = db_conn.execute('SELECT * FROM DocumentLike WHERE AccountID=? AND DocumentID=?', (session['userid'], document_id))
     res = cursor.fetchone()
@@ -496,7 +496,7 @@ def comment_document(document_id):
     res = cursor.fetchone()
     if not res:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message="Uh oh... that document doesn't seem to exist"), 403
+        return render_template('errors/error_base.html', error_title='404', error_message="Uh oh... that document doesn't seem to exist", session=session), 403
 
     owner_id, public = res # unpack the retrieve data
 

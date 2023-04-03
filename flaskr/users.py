@@ -23,7 +23,7 @@ def account(account_id):
     
     if not res:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message="Hmm, it seems like that person doesn't exist...")
+        return render_template('errors/error_base.html', error_title='404', error_message="Hmm, it seems like that person doesn't exist...", session=session)
     else:
         userid, username, password, email, newsletters, restricted, banknum, banksort, membership, access_level = res
         cursor = db_conn.execute('SELECT Name FROM AccessLevel WHERE AccessID=?', (access_level,))
@@ -34,7 +34,7 @@ def account(account_id):
         documents = cursor.fetchall()
 
         db_conn.close()
-        return render_template('accounts/account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level, access_name=access_name, public_documents=documents)
+        return render_template('accounts/account.html', userid=res[0], username=res[1], email=res[3], access_level=access_level, access_name=access_name, public_documents=documents, session=session)
 
 ######################
 # User Access Levels #
@@ -156,7 +156,7 @@ def edit_account():
 @check_loggedin
 def membership():
     if request.method=='GET':
-        return render_template('accounts/membership.html')
+        return render_template('accounts/membership.html', session=session)
     elif request.method=='POST':
         db_conn = sqlite3.connect(config.db_dir)
         action = request.form['action'] # whether the user is subscring or unsubscribing
@@ -191,7 +191,7 @@ def membership():
 @check_loggedin
 def delete_account():
     if request.method == 'GET':
-        return render_template('accounts/delete_account.html')
+        return render_template('accounts/delete_account.html', session=session)
     elif request.method == 'POST':
         userid = session['userid']
         db_conn = sqlite3.connect(config.db_dir)

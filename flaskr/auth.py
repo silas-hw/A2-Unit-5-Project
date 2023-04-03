@@ -47,9 +47,9 @@ def login():
         else:
             # reload the login page but with an error message
             # err_msg will be inserted into the login.html template by jinja2
-            return render_template('/auth/login.html', err_msg='Incorrect Email or Password')
+            return render_template('/auth/login.html', err_msg='Incorrect Email or Password', session=session)
 
-    return render_template('/auth/login.html', err_msg='')
+    return render_template('/auth/login.html', err_msg='', session=session)
 
 @bp.route('/logout/', methods=['GET'])
 @check_loggedin
@@ -73,7 +73,7 @@ def register():
     
     try:
         if request.method == 'GET':
-            return render_template('/auth/register.html', err_msg='')
+            return render_template('/auth/register.html', err_msg='', session=session)
 
         elif request.method == 'POST':
             # if required data hasn't been entered return an error message to the user
@@ -126,4 +126,4 @@ def register():
             return redirect(url_for('main.home'))
     except AssertionError as err:
         err_msg = err
-        return render_template('/auth/register.html', err_msg=err_msg)
+        return render_template('/auth/register.html', err_msg=err_msg, session=session)

@@ -45,14 +45,14 @@ def create_app(test_config=None):
     return app
 
 def page_not_found(e):
-    return render_template('errors/error_base.html', error_title='404', error_message="Sorry mate, that URL isn't correct")
+    return render_template('errors/error_base.html', error_title='404', error_message="Sorry mate, that URL isn't correct", session=session)
 
 def server_error(e):
-    return render_template('errors/error_base.html', error_title='500', error_message="Oops... the server ran into a problem")
+    return render_template('errors/error_base.html', error_title='500', error_message="Oops... the server ran into a problem", session=session)
 
 def bad_gateway(e):
-    return render_template('errors/error_base.html', error_title='502', error_message='Error: bad gateway')
+    return render_template('errors/error_base.html', error_title='502', error_message='Error: bad gateway', session=session)
 
 def service_unavailable(e):
-    return render_template('errors/error_base.html', error_title="503", error_message=":/ Service Unavailable. The server was not able to handle your request; It may be overloaded or down for maintenance.")
+    return render_template('errors/error_base.html', error_title="503", error_message=":/ Service Unavailable. The server was not able to handle your request; It may be overloaded or down for maintenance.", session=session)
 

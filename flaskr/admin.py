@@ -156,7 +156,7 @@ def create_newsletter():
 
     try:
         if request.method=='GET':
-            return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10])
+            return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], session=session)
         elif request.method=='POST':
             # retrieve data that the user entered into the form
             subject = request.form['subject']
@@ -184,7 +184,7 @@ def create_newsletter():
     except AssertionError as err:
         # return the newsletter edit page with an error message is validation fails
         err_msg = err
-        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg)
+        return render_template('admin/newsletter_edit.html', action='add', newsletter=[''*10], err_msg=err_msg, session=session)
         
 
 @bp.route('/admin/newsletter/edit/<newsletter_id>', methods=['POST', 'GET'])
@@ -207,7 +207,7 @@ def edit_newsletter(newsletter_id):
             # redirect the user if no data is found
             if not newsletter:
                 db_conn.close()
-                return render_template('errors/error_base.html', error_title='404', error_message="That newsletter doesn't exist :/")
+                return render_template('errors/error_base.html', error_title='404', error_message="That newsletter doesn't exist :/", session=session)
                 
             newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
@@ -278,7 +278,7 @@ def delete_newsletter(newsletter_id):
     # if the newsletter doesn't exit then redirect the user
     if not res:
         db_conn.close()
-        return render_template('errors/error_base.html', error_title='404', error_message="That newsletter doesn't exist :/")
+        return render_template('errors/error_base.html', error_title='404', error_message="That newsletter doesn't exist :/", session=session)
 
     # delete the newsletter
     db_conn.execute('DELETE FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
