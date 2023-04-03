@@ -19,7 +19,7 @@ def admin_portal():
     '''
 
     # count the number of accounts that have been created
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SElECT COUNT(AccountID) FROM User')
     num_users = cursor.fetchone()[0]
     db_conn.close()
@@ -40,7 +40,7 @@ def database_view():
     table, search options and filters the user has chosen.
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
 
     cursor = db_conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'") # retrieves a list of the names of every table in the database
     database_tables = cursor.fetchall()
@@ -65,7 +65,7 @@ def database_table():
     sort_field = request.args.get('sort_field')
     sort_direction = request.args.get('sort_direction')
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
 
     # get all of the fieldnames of the table
     cursor = db_conn.execute(f'PRAGMA table_info({table})')
@@ -103,7 +103,7 @@ def database_fieldnames():
 
     table = request.args.get('table')
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute(f'PRAGMA table_info({table})')
     table_headers = cursor.fetchall()
     table_headers = [header[1] for header in table_headers]
@@ -124,7 +124,7 @@ def newsletters():
     '''
 
     # Retrieve all the newsletters
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT * FROM Newsletter')
     newsletter_list = cursor.fetchall()
 
@@ -165,15 +165,15 @@ def create_newsletter():
 
             # data validation
             assert date_str, 'Send data cannot be empty'
-            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow DATE_FORMAT_ISO8601'
             
-            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.DATE_FORMAT_ISO8601).timetuple()))
             
             assert date>int(time.time()), 'Send Date must be in the future'
             assert len(subject) >= 1, 'Subject cannot be empty'
             assert len(content) >= 1, 'Content cannot be empty'
 
-            db_conn = sqlite3.connect(config.db_dir)
+            db_conn = sqlite3.connect(config.DB_DIR)
             db_conn.execute('INSERT INTO Newsletter (AccountID, Subject, Content, DateSendEpoch) VALUES (?, ?, ?, ?)', (session['userid'], subject, content, date))
             db_conn.commit()
 
@@ -200,7 +200,7 @@ def edit_newsletter(newsletter_id):
     try:
         if request.method == 'GET':
             # retrieve the data associated with the given Newsletter ID
-            db_conn = sqlite3.connect(config.db_dir)
+            db_conn = sqlite3.connect(config.DB_DIR)
             cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
             newsletter = cursor.fetchone()
 
@@ -212,14 +212,14 @@ def edit_newsletter(newsletter_id):
             newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
             # convert the Unix timestamp of the newsletter into a human-readable date format
-            date_str = time.strftime(config.iso8601, time.localtime(newsletter[4])) 
+            date_str = time.strftime(config.DATE_FORMAT_ISO8601, time.localtime(newsletter[4])) 
 
             db_conn.close()
 
             return render_template('admin/newsletter_edit.html', action='edit', session=session, newsletter=newsletter, newsletter_id=newsletter_id, date_str=date_str)
 
         elif request.method == 'POST':
-            db_conn = sqlite3.connect(config.db_dir)
+            db_conn = sqlite3.connect(config.DB_DIR)
 
             # retrieve the data entered in the form
             subject = request.form['subject']
@@ -228,9 +228,9 @@ def edit_newsletter(newsletter_id):
 
             # data validation
             assert date_str, 'Send data cannot be empty'
-            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow ISO8601'
+            assert validate_isodate(date_str), 'Date string format incorrect (direct post request error). It should follow DATE_FORMAT_ISO8601'
             
-            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.iso8601).timetuple()))
+            date = int(time.mktime(datetime.datetime.strptime(request.form['send_date'], config.DATE_FORMAT_ISO8601).timetuple()))
             
             assert date>int(time.time()), 'Send Date must be in the future'
             assert len(subject) >= 1, 'Subject cannot be empty'
@@ -249,12 +249,12 @@ def edit_newsletter(newsletter_id):
 
     except AssertionError as err:
         # The error message can't be displayed by simply using a redirect call, so previous code needs to be repeated (unfortunately)
-        db_conn = sqlite3.connect(config.db_dir)
+        db_conn = sqlite3.connect(config.DB_DIR)
         cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
         newsletter = cursor.fetchone()
         newsletter_id, account_id, subject, content, date_epoch, sent = newsletter
 
-        date_str = time.strftime(config.iso8601, time.localtime(newsletter[4]))
+        date_str = time.strftime(config.DATE_FORMAT_ISO8601, time.localtime(newsletter[4]))
 
         db_conn.close()
 
@@ -271,7 +271,7 @@ def delete_newsletter(newsletter_id):
     '''
 
     # check if the newsletter actually exists
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT * FROM Newsletter WHERE NewsletterID=?', (newsletter_id,))
     res = cursor.fetchone()
     

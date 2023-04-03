@@ -25,7 +25,7 @@ def login():
         password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest() # instantly hash/encrypt the password with sha256 to hexadecimal
 
         # create an sqlite connection and check if the entered account details exist and match within the database
-        db_conn = sqlite3.connect(config.db_dir)
+        db_conn = sqlite3.connect(config.DB_DIR)
         cursor = db_conn.execute('SELECT AccountID, Username, AccessLevel, ReceiveNewsletter FROM User WHERE Email=? AND Password=?', (email, password_hash))
         res = cursor.fetchone()
         db_conn.close()
@@ -101,7 +101,7 @@ def register():
             password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
             # create an sqlite connection to check if the account already exists
-            db_conn = sqlite3.connect(config.db_dir)
+            db_conn = sqlite3.connect(config.DB_DIR)
             cursor = db_conn.execute('SELECT AccountID FROM User WHERE Email=? OR Username=?', (email, username))
             res = cursor.fetchone()
             

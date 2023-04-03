@@ -16,10 +16,13 @@ def home():
     returns the homepage to users who are not logged in and redirects logged in users to their dashboard
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    # retrieve five website ratings in descending order to be displayed on the landing page
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT Rating, AccountID FROM WebsiteRating ORDER BY Rating DESC LIMIT 5')
     ratings_temp=cursor.fetchall()
     ratings=[]
+
+    # add usernames to the retrieved ratings
     for rating in ratings_temp:
         cursor = db_conn.execute('SELECT Username FROM User WHERE AccountID=?', (rating[1],))
         username = cursor.fetchone()[0]
@@ -37,7 +40,7 @@ def dashboard():
     returns the dashboard to users who are logged in and redirects not logged in users to the homepage
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT DocumentName, Description, AccountID, DocumentID FROM Document WHERE Public=1 ORDER BY DocumentID DESC LIMIT 20')
     res = cursor.fetchall()
 

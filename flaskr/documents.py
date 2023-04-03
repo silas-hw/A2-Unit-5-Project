@@ -24,7 +24,7 @@ def my_documents():
     '''
 
     # create an sqlite connection and retrieve a list of the currently logged in users documents
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT DocumentName, Description, Public, DocumentID FROM Document WHERE AccountID=?', (session['userid'],))
     documents = cursor.fetchall()
 
@@ -57,7 +57,7 @@ def document_view(document_id):
     '''
 
     #create an sqlite connection and retrieve the details of the document provided
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT AccountID, public, DocumentName, Description, Restricted FROM Document WHERE DocumentID=?', (document_id,))
     res = cursor.fetchone()
 
@@ -94,7 +94,7 @@ def add_document():
     # Check if the user has reached their document creation limit #
 
     # create an sqlite connection and retrieve a count of how many documents the user has created
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT COUNT(DocumentID) FROM Document WHERE AccountID=?', (session['userid'], ))
     num_docs = cursor.fetchone()[0]
 
@@ -140,7 +140,7 @@ def edit_document(document_id):
     '''
     Used when a user decides to edit a document they own
     '''
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
 
     # check if the current users owns the document, redirecting them if they do not
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
@@ -191,7 +191,7 @@ def delete_document(document_id):
     '''
     
     # check if the user owns the document, redirecting them if they do not
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     doc_account_id = cursor.fetchone()[0]
 
@@ -216,7 +216,7 @@ def private_document(document_id):
     '''
 
     # update a document to change its Public field to False 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE Document SET Public=0 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
     db_conn.close()
@@ -230,7 +230,7 @@ def restrict_document(document_id):
     '''
     Allows a document to be restricted by a moderator.
     '''
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE Document SET Restricted=1 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
     db_conn.close()
@@ -245,7 +245,7 @@ def unrestrict_document(document_id):
     Allows a document to be unrestricted by a moderator
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE Document SET Restricted=0 WHERE DocumentID=?', (document_id,))
     db_conn.commit()
     db_conn.close()
@@ -265,7 +265,7 @@ def page_view(page_id):
     '''
 
     # retrieve data relating to the document that the page belongs to
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT AccountID, public FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     res = cursor.fetchone()
 
@@ -300,7 +300,7 @@ def add_page(document_id):
     '''
 
     # check if the user owns the document the page belongs to, returning an error message if they do not
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT AccountID FROM Document WHERE DocumentID=?', (document_id,))
     account_id = cursor.fetchone()[0]
 
@@ -341,7 +341,7 @@ def edit_page(page_id):
     '''
     
     # retrieve data relating to the document the page belongs to and the page itself
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT Document.AccountID, Page.DocumentID, Page.Name, Page.Content FROM Page INNER JOIN Document ON Page.DocumentID=Document.DocumentID WHERE PageID=? ', (page_id,))
     account_id, document_id, page_title, page_content = cursor.fetchone()
 
@@ -382,7 +382,7 @@ def delete_page(page_id):
     '''
     
     # retrieve data relating to the document that the page belongs to
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT AccountID, DocumentID FROM Document WHERE DocumentID=(SELECT DocumentID FROM Page WHERE PageID=?)', (page_id,))
     page_account_id, document_id = cursor.fetchone()
 
@@ -414,16 +414,16 @@ def comment_list(type):
     # liking is done by JavaScript, so request data is given in the json format
     request_data = request.get_json()
 
-    db_conn = sqlite3.connect(config.db_dir)
-    offset = int(request_data['offset'])*config.num_comments # determines how far into the table comments should be retrieved from
+    db_conn = sqlite3.connect(config.DB_DIR)
+    offset = int(request_data['offset'])*config.COMMENT_LIMIT # determines how far into the table comments should be retrieved from
 
     # retrieve data from the corresponding table depending on whether comments for a document or comments for a community post are being retrieved
     if type=='document':
         document_id = request_data['document_id']
-        cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.num_comments, offset))
+        cursor = db_conn.execute('SELECT CommentID FROM DocumentComment WHERE DocumentID=? LIMIT ? OFFSET ?', (document_id, config.COMMENT_LIMIT, offset))
     else:
         post_id = request_data['post_id']
-        cursor = db_conn.execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.num_comments, offset))
+        cursor = db_conn.execute('SELECT CommentID FROM CommunityPostComment WHERE PostID=? LIMIT ? OFFSET ?', (post_id, config.COMMENT_LIMIT, offset))
 
     comment_ids=[id[0] for id in cursor.fetchall()] # create a table of comment IDs from the comments retrieved
 
@@ -454,7 +454,7 @@ def like_document(document_id):
     Likes or un-likes documents
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
 
     # if the document doesn't exist then redirect the user
     cursor = db_conn.execute('SElECT * FROM Document WHERE DocumentID=?', (document_id,))
@@ -489,7 +489,7 @@ def comment_document(document_id):
     '''
     Adds a comment to a document
     '''
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
 
     # if the document doesn't exist then redirect the user
     cursor = db_conn.execute('SElECT AccountID, Public FROM Document WHERE DocumentID=?', (document_id,))
@@ -531,7 +531,7 @@ def comment_document(document_id):
 @bp.route('/document/comment/delete/<comment_id>/', methods=['GET'])
 @check_loggedin
 def delete_comment(comment_id):
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
  
     cursor = db_conn.execute('SELECT DocumentID FROM DocumentComment WHERE CommentID=?', (comment_id,))
     document_id = cursor.fetchone()[0]

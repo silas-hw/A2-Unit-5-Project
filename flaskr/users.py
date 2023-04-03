@@ -17,7 +17,7 @@ def account(account_id):
     Displays information relating to an account of a given account id
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=?', (account_id,))
     res = cursor.fetchone()
     
@@ -48,7 +48,7 @@ def user_mod(account_id):
     Makes the access level of a user equal to that of a moderator
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE User SET AccessLevel=2 WHERE AccountID=?', (account_id,))
     db_conn.commit()
     db_conn.close()
@@ -63,7 +63,7 @@ def user_admin(account_id):
     Makes the access rights of a user equal to that of an admin
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE User SET AccessLevel=3 WHERE AccountID=?', (account_id,))
     db_conn.commit()
     db_conn.close()
@@ -78,7 +78,7 @@ def user_remove_rights(account_id):
     Removes all the access rights of a user, returning them to a 'standard' user.
     '''
 
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     db_conn.execute('UPDATE User SET AccessLevel=1 WHERE AccountID=?', (account_id,))
     db_conn.commit()
     db_conn.close()
@@ -114,7 +114,7 @@ def edit_account():
             oldpassword_hash = hashlib.sha256(oldpassword.encode('utf-8')).hexdigest() # hash/encrypt the old password with sha256 to hexadecimal
 
             # data validation
-            db_conn = sqlite3.connect(config.db_dir)
+            db_conn = sqlite3.connect(config.DB_DIR)
             cursor = db_conn.execute('SELECT * FROM User WHERE AccountID=? AND Password=?', (session['userid'], oldpassword_hash))
             res = cursor.fetchone()
 
@@ -158,7 +158,7 @@ def membership():
     if request.method=='GET':
         return render_template('accounts/membership.html', session=session)
     elif request.method=='POST':
-        db_conn = sqlite3.connect(config.db_dir)
+        db_conn = sqlite3.connect(config.DB_DIR)
         action = request.form['action'] # whether the user is subscring or unsubscribing
 
         cursor = db_conn.execute('SELECT MembershipLevel FROM User WHERE AccountID=?', (session['userid'],))
@@ -194,7 +194,7 @@ def delete_account():
         return render_template('accounts/delete_account.html', session=session)
     elif request.method == 'POST':
         userid = session['userid']
-        db_conn = sqlite3.connect(config.db_dir)
+        db_conn = sqlite3.connect(config.DB_DIR)
 
         # delete every database entry associated with the users account id
         db_conn.execute('DELETE FROM WebsiteRating WHERE AccountID=?', (userid,))

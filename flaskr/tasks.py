@@ -13,7 +13,7 @@ def send_email():
     '''
     Sends all unsent emails if their send-date is before or equal to the current time.
     '''
-    db_conn=sqlite3.connect(config.db_dir)
+    db_conn=sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT Email FROM User WHERE ReceiveNewsletter=1')
     email_list = [email[0] for email in cursor.fetchall()]
 

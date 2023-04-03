@@ -12,7 +12,7 @@ bp = Blueprint('reviews', __name__)
 def review():
 
     # retrieve the users current rating if they have made one at all
-    db_conn = sqlite3.connect(config.db_dir)
+    db_conn = sqlite3.connect(config.DB_DIR)
     cursor = db_conn.execute('SELECT Rating FROM WebsiteRating WHERE AccountID=?', (session['userid'],))
     user_rating = cursor.fetchone() 
     user_rating = str(user_rating) if user_rating else ''

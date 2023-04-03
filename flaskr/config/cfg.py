@@ -3,9 +3,9 @@ This is a simple class used to store config values to be accessed by different p
 '''
 
 class Config:
-    db_dir = './db/project.db'
-    num_comments=20
-    iso8601='%Y-%m-%d' # The ISO8601 datetime format
+    DB_DIR = './db/project.db'
+    COMMENT_LIMIT=20
+    DATE_FORMAT_ISO8601='%Y-%m-%d' # The DATE_FORMAT_ISO8601 datetime format
 
     search_type_reference = {
         'eq':'=',
