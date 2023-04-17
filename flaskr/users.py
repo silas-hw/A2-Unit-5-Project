@@ -155,6 +155,11 @@ def edit_account():
 @bp.route('/membership/', methods=['POST', 'GET'])
 @check_loggedin
 def membership():
+    '''
+    Allows a user to either subscribe or unsubscribe to a premium membership. Currently no payment actually occurs, but in the future there
+    will be.
+    '''
+
     if request.method=='GET':
         return render_template('accounts/membership.html', session=session)
     elif request.method=='POST':
@@ -164,6 +169,7 @@ def membership():
         cursor = db_conn.execute('SELECT MembershipLevel FROM User WHERE AccountID=?', (session['userid'],))
         current_membership = int(cursor.fetchone()[0])
 
+        # if the user chooses to subscribe and they currently do not have a membership
         if action=='subscribe' and current_membership==1:
             db_conn.execute('UPDATE User SET MembershipLevel=2 WHERE AccountID=?', (session['userid'],))
             db_conn.commit()

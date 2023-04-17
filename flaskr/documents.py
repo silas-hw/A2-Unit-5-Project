@@ -410,6 +410,9 @@ def delete_page(page_id):
 @bp.route('/<type>/commentlist', methods=['POST'])
 @check_loggedin
 def comment_list(type):
+    '''
+    Returns a list of comment for a given community post or document
+    '''
 
     # liking is done by JavaScript, so request data is given in the json format
     request_data = request.get_json()

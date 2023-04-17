@@ -18,6 +18,9 @@ def sql_prepared_tuple(length, count=1, output=""):
         return sql_prepared_tuple(length, count+1, output+'?,')
 
 def check_email(email):
+    '''
+    Validates that the format of an email is correct
+    '''
     local = False
     seperator = False
     domain_name = False
@@ -38,6 +41,9 @@ def check_email(email):
     return (local and seperator and domain_name and domain_toplevel)
 
 def validate_isodate(date_str):
+    '''
+    Returns a boolean as to whether a given date string matches the ISO format
+    '''
     try:
         datetime.date.fromisoformat(date_str)
     except ValueError:

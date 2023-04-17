@@ -76,7 +76,8 @@ def database_table():
     statement = f'SELECT * FROM {table}'
     if query and ';' not in query and ';' not in field:
         search_type = config.search_type_reference[search_type]
-        statement += f' WHERE {field}{search_type}{query}'
+
+        statement += f' WHERE {field}{search_type}"{query}"'
 
     if sort_field in table_headers and sort_direction in ('ASC', 'DESC'):
         statement += f' ORDER BY {sort_field} {sort_direction}'

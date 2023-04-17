@@ -1,4 +1,4 @@
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, render_template
 import functools
 
 def check_loggedin(func):
@@ -36,7 +36,7 @@ def check_admin(func):
             access_level = session['access']
             if access_level == 3:
                 return func(*args, **kargs)
-        return redirect(url_for('main.dashboard'))
+        return render_template('errors/error_base.html', session=session, error_title='403: forbidden', error_message='Nothing to see here'), 403
     return wrapper
 
 def check_moderator(func):

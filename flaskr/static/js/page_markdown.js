@@ -1,4 +1,5 @@
 function insert_into_textarea(text) {
+    // insert a given string into the textarea at the current position of the cursor
     textarea = document.getElementById('content')
     //IE support
     if (document.selection) {
@@ -14,12 +15,12 @@ function insert_into_textarea(text) {
             + text
             + textarea.value.substring(endPos, textarea.value.length);
 
-        textarea.focus()
+        textarea.focus() // ensures the textarea remains selected so the user can continue typing
         textarea.selectionEnd = endPos
         textarea.selectionStart = endPos
     } else {
         textarea.value += text;
-        textarea.focus()
+        textarea.focus()// ensures the textarea remains selected so the user can continue typing
         cursorPos = textarea.value.length-text.length
         textarea.selectionEnd = cursorPos
         textarea.selectionStart = cursorPos
@@ -27,6 +28,7 @@ function insert_into_textarea(text) {
 }
 
 function italic() {
+    // add markup for italic text into textarea
     textarea = document.getElementById('content')
     cursorPos = insert_into_textarea('**')
 
@@ -35,6 +37,7 @@ function italic() {
 }
 
 function bold() {
+    // add markup for bold text into textarea
     textarea = document.getElementById('content')
     insert_into_textarea('****')
 
@@ -43,6 +46,7 @@ function bold() {
 }
 
 function header(size) {
+    // add markup for a header of a given size into the textarea
     textarea = document.getElementById('content')
     insert_into_textarea('#'.repeat(size)+' ')
 
@@ -51,6 +55,7 @@ function header(size) {
 }
 
 function bulletpoint() {
+    // add markup for a bulletpoint into the textarea
     textarea = document.getElementById('content')
     insert_into_textarea('\n- ')
     textarea.selectionEnd+=3
